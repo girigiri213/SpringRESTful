@@ -1,6 +1,6 @@
-package com.hustunique.controller;
+package com.girigiri.controller;
 
-import com.hustunique.SpringMvcApplication;
+import com.girigiri.SpringMvcApplication;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.web.servlet.MockMvc;

@@ -1,4 +1,4 @@
-package com.hustunique;
+package com.girigiri;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
