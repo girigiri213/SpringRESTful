@@ -208,7 +208,7 @@ public class RepairHistory {
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
+        int result = 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (time != null ? time.hashCode() : 0);
         result = 31 * result + (checkHistory != null ? checkHistory.hashCode() : 0);

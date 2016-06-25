@@ -119,7 +119,7 @@ public class Request {
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
+        int result = 0;
         result = 31 * result + (time != null ? time.hashCode() : 0);
         result = 31 * result + predictPrice;
         result = 31 * result + (predictTime != null ? predictTime.hashCode() : 0);

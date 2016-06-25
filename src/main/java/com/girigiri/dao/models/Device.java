@@ -312,7 +312,7 @@ public class Device {
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
+        int result = 0;
         result = 31 * result + type;
         result = 31 * result + (brand != null ? brand.hashCode() : 0);
         result = 31 * result + (number != null ? number.hashCode() : 0);

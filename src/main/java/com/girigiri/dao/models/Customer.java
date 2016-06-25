@@ -18,7 +18,7 @@ import java.util.Date;
 @Table(name = "customer")
 public class Customer {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue()
     private Long id;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -34,11 +34,9 @@ public class Customer {
     private Long version;
 
     @NotNull
-    private Long userId;
+    private String userId;
 
     //TODO: Limit type to 1, 2, 3 or 4
-    @Max(4)
-    @Min(1)
     private int type;
 
     private String companyName;
@@ -53,19 +51,39 @@ public class Customer {
 
     private String zip;
 
+    @NotNull
     private String contactName;
 
-    @NotNull
+
     private String email;
 
 
-    public Customer(Long userId, String mobile, String address, String email) {
-        this(userId, 1, null, null, mobile, address, null, null, email);
+    public Customer(String userId, String mobile, String address, String contactName) {
+        this(userId, 1, null, null, mobile, address, null, contactName, null);
     }
 
     public Customer() {}
 
-    public Customer(Long userId, int type, String companyName, String phone, String mobile, String address, String zip, String contactName, String email) {
+
+    public Customer(Long id, String userId, String mobile, String address, String contactName) {
+        this(id, userId, 1, null, null, mobile, address, null, contactName, null);
+    }
+
+    public Customer(Long id, String userId, int type, String companyName, String phone, String mobile, String address, String zip, String contactName, String email) {
+        this.id = id;
+        this.userId = userId;
+        this.type = type;
+        this.companyName = companyName;
+        this.phone = phone;
+        this.mobile = mobile;
+        this.address = address;
+        this.zip = zip;
+        this.contactName = contactName;
+        this.email = email;
+    }
+
+
+    public Customer(String userId, int type, String companyName, String phone, String mobile, String address, String zip, String contactName, String email) {
         this.userId = userId;
         this.type = type;
         this.companyName = companyName;
@@ -82,11 +100,11 @@ public class Customer {
     }
 
 
-    public Long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -183,43 +201,5 @@ public class Customer {
                 ", contactName='" + contactName + '\'' +
                 ", email='" + email + '\'' +
                 '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Customer customer = (Customer) o;
-
-        if (type != customer.type) return false;
-        if (!id.equals(customer.id)) return false;
-        if (!created.equals(customer.created)) return false;
-        if (!userId.equals(customer.userId)) return false;
-        if (companyName != null ? !companyName.equals(customer.companyName) : customer.companyName != null)
-            return false;
-        if (phone != null ? !phone.equals(customer.phone) : customer.phone != null) return false;
-        if (!mobile.equals(customer.mobile)) return false;
-        if (!address.equals(customer.address)) return false;
-        if (zip != null ? !zip.equals(customer.zip) : customer.zip != null) return false;
-        if (!contactName.equals(customer.contactName)) return false;
-        return email != null ? email.equals(customer.email) : customer.email == null;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + created.hashCode();
-        result = 31 * result + userId.hashCode();
-        result = 31 * result + type;
-        result = 31 * result + (companyName != null ? companyName.hashCode() : 0);
-        result = 31 * result + (phone != null ? phone.hashCode() : 0);
-        result = 31 * result + mobile.hashCode();
-        result = 31 * result + address.hashCode();
-        result = 31 * result + (zip != null ? zip.hashCode() : 0);
-        result = 31 * result + contactName.hashCode();
-        result = 31 * result + (email != null ? email.hashCode() : 0);
-        return result;
     }
 }

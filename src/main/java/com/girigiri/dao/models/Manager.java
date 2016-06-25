@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Arrays;
 
+
 /**
  * Created by JianGuo on 6/25/16.
  * manager for this system, this will be implemented with RBAC access.

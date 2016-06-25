@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.web.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class SpringMvcApplication extends SpringBootServletInitializer {
+public class SpringMvcApplication {
 
 
 	public static void main(String[] args) {
