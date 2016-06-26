@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,8 +20,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
 
-import static com.girigiri.utils.TestUtil.getResourceIdFromUrl;
-import static com.girigiri.utils.TestUtil.objToJson;
+import static com.girigiri.utils.TestUtil.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -40,10 +38,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @WebAppConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RepairHistoryRepositoryTests {
-    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-            SUBTYPE);
-
-    private static final String SUBTYPE = "hal+json";
 
     private MockMvc mockMvc;
     @Autowired

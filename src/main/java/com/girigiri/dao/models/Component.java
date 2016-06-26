@@ -1,11 +1,9 @@
 package com.girigiri.dao.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -28,17 +26,18 @@ public class Component {
     private String serial;
 
     @NotNull
+    @Min(0)
     private int price;
 
     @NotNull
+    @Min(0)
     private int size;
 
     @NotNull
+    @Min(0)
     private int warningSize;
 
-    //TODO: limit it with 1, 2, 3, 4
-    @Max(4)
-    @Min(1)
+    @JsonIgnore
     private int state;
 
     private Date created;
@@ -108,6 +107,7 @@ public class Component {
 
     public void setSize(int size) {
         this.size = size;
+        setState();
     }
 
     public int getWarningSize() {
@@ -116,14 +116,23 @@ public class Component {
 
     public void setWarningSize(int warningSize) {
         this.warningSize = warningSize;
+        setState();
     }
 
     public int getState() {
         return state;
     }
 
-    public void setState(int state) {
-        this.state = state;
+    public void setState() {
+        if (size > warningSize) {
+            state = 1;
+        } else if (size == warningSize) {
+            state = 2;
+        } else if (size < warningSize && size > 0) {
+            state = 3;
+        } else {
+            state = 4;
+        }
     }
 
 
@@ -134,5 +143,28 @@ public class Component {
     public void setVersion(Long version) {
         this.version = version;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Component() {
+
+    }
+
+    public Component(String name, int price, int size, int warningSize) {
+        this(name, null, price, size, warningSize);
+    }
+
+    public Component(String name, String serial, int price, int size, int warningSize) {
+        this.name = name;
+        this.serial = serial;
+        this.price = price;
+        this.size = size;
+        this.warningSize = warningSize;
+        setState();
+    }
+
 }
+
 

@@ -1,6 +1,5 @@
 package com.girigiri.dao.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -23,7 +22,6 @@ public class Device {
     private Long id;
 
 
-    //TODO: limit the type to 1, 2, 3, 4, 5
     @NotNull
     @Min(1)
     @Max(5)
@@ -40,7 +38,6 @@ public class Device {
     @NotNull
     private String error;
 
-    //TODO: limit the type to 1, 2
     @NotNull
     @Min(1)
     @Max(2)
@@ -104,7 +101,7 @@ public class Device {
     private Long version;
 
 
-
+    public Device() {}
 
 
     public Device(int type, String brand, String number, String serial, String components, String error, int errorType, String appearance, String pwd, String data, String HDD, String memory, String PCoutside, String adapter, String battery, String CDoutside, String other) {
@@ -301,38 +298,41 @@ public class Device {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Device that = (Device) o;
+        Device device = (Device) o;
 
-        if (type != that.type) return false;
-        if (errorType != that.errorType) return false;
-        if (!id.equals(that.id)) return false;
-        if (brand != null ? !brand.equals(that.brand) : that.brand != null) return false;
-        if (number != null ? !number.equals(that.number) : that.number != null) return false;
-        if (serial != null ? !serial.equals(that.serial) : that.serial != null) return false;
-        if (components != null ? !components.equals(that.components) : that.components != null) return false;
-        if (!error.equals(that.error)) return false;
-        if (appearance != null ? !appearance.equals(that.appearance) : that.appearance != null) return false;
-        if (pwd != null ? !pwd.equals(that.pwd) : that.pwd != null) return false;
-        if (data != null ? !data.equals(that.data) : that.data != null) return false;
-        if (HDD != null ? !HDD.equals(that.HDD) : that.HDD != null) return false;
-        if (memory != null ? !memory.equals(that.memory) : that.memory != null) return false;
-        if (PCoutside != null ? !PCoutside.equals(that.PCoutside) : that.PCoutside != null) return false;
-        if (adapter != null ? !adapter.equals(that.adapter) : that.adapter != null) return false;
-        if (battery != null ? !battery.equals(that.battery) : that.battery != null) return false;
-        if (CDoutside != null ? !CDoutside.equals(that.CDoutside) : that.CDoutside != null) return false;
-        return other != null ? other.equals(that.other) : that.other == null;
+        if (type != device.type) return false;
+        if (errorType != device.errorType) return false;
+        if (id != null ? !id.equals(device.id) : device.id != null) return false;
+        if (brand != null ? !brand.equals(device.brand) : device.brand != null) return false;
+        if (number != null ? !number.equals(device.number) : device.number != null) return false;
+        if (serial != null ? !serial.equals(device.serial) : device.serial != null) return false;
+        if (components != null ? !components.equals(device.components) : device.components != null) return false;
+        if (error != null ? !error.equals(device.error) : device.error != null) return false;
+        if (appearance != null ? !appearance.equals(device.appearance) : device.appearance != null) return false;
+        if (pwd != null ? !pwd.equals(device.pwd) : device.pwd != null) return false;
+        if (data != null ? !data.equals(device.data) : device.data != null) return false;
+        if (HDD != null ? !HDD.equals(device.HDD) : device.HDD != null) return false;
+        if (memory != null ? !memory.equals(device.memory) : device.memory != null) return false;
+        if (PCoutside != null ? !PCoutside.equals(device.PCoutside) : device.PCoutside != null) return false;
+        if (adapter != null ? !adapter.equals(device.adapter) : device.adapter != null) return false;
+        if (battery != null ? !battery.equals(device.battery) : device.battery != null) return false;
+        if (CDoutside != null ? !CDoutside.equals(device.CDoutside) : device.CDoutside != null) return false;
+        if (other != null ? !other.equals(device.other) : device.other != null) return false;
+        if (created != null ? !created.equals(device.created) : device.created != null) return false;
+        if (updated != null ? !updated.equals(device.updated) : device.updated != null) return false;
+        return version != null ? version.equals(device.version) : device.version == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
+        int result = id != null ? id.hashCode() : 0;
         result = 31 * result + type;
         result = 31 * result + (brand != null ? brand.hashCode() : 0);
         result = 31 * result + (number != null ? number.hashCode() : 0);
         result = 31 * result + (serial != null ? serial.hashCode() : 0);
         result = 31 * result + (components != null ? components.hashCode() : 0);
-        result = 31 * result + error.hashCode();
+        result = 31 * result + (error != null ? error.hashCode() : 0);
         result = 31 * result + errorType;
         result = 31 * result + (appearance != null ? appearance.hashCode() : 0);
         result = 31 * result + (pwd != null ? pwd.hashCode() : 0);
@@ -344,8 +344,9 @@ public class Device {
         result = 31 * result + (battery != null ? battery.hashCode() : 0);
         result = 31 * result + (CDoutside != null ? CDoutside.hashCode() : 0);
         result = 31 * result + (other != null ? other.hashCode() : 0);
+        result = 31 * result + (created != null ? created.hashCode() : 0);
+        result = 31 * result + (updated != null ? updated.hashCode() : 0);
+        result = 31 * result + (version != null ? version.hashCode() : 0);
         return result;
     }
-
-
 }

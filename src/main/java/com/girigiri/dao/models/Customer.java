@@ -207,5 +207,46 @@ public class Customer {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
+        Customer customer = (Customer) o;
+
+        if (type != customer.type) return false;
+        if (id != null ? !id.equals(customer.id) : customer.id != null) return false;
+        if (created != null ? !created.equals(customer.created) : customer.created != null) return false;
+        if (updated != null ? !updated.equals(customer.updated) : customer.updated != null) return false;
+        if (version != null ? !version.equals(customer.version) : customer.version != null) return false;
+        if (userId != null ? !userId.equals(customer.userId) : customer.userId != null) return false;
+        if (companyName != null ? !companyName.equals(customer.companyName) : customer.companyName != null)
+            return false;
+        if (phone != null ? !phone.equals(customer.phone) : customer.phone != null) return false;
+        if (mobile != null ? !mobile.equals(customer.mobile) : customer.mobile != null) return false;
+        if (address != null ? !address.equals(customer.address) : customer.address != null) return false;
+        if (zip != null ? !zip.equals(customer.zip) : customer.zip != null) return false;
+        if (contactName != null ? !contactName.equals(customer.contactName) : customer.contactName != null)
+            return false;
+        return email != null ? email.equals(customer.email) : customer.email == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (created != null ? created.hashCode() : 0);
+        result = 31 * result + (updated != null ? updated.hashCode() : 0);
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        result = 31 * result + (userId != null ? userId.hashCode() : 0);
+        result = 31 * result + type;
+        result = 31 * result + (companyName != null ? companyName.hashCode() : 0);
+        result = 31 * result + (phone != null ? phone.hashCode() : 0);
+        result = 31 * result + (mobile != null ? mobile.hashCode() : 0);
+        result = 31 * result + (address != null ? address.hashCode() : 0);
+        result = 31 * result + (zip != null ? zip.hashCode() : 0);
+        result = 31 * result + (contactName != null ? contactName.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
+        return result;
+    }
 }
