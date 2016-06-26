@@ -65,14 +65,14 @@ public class CustomerRepositoryTests {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
-        Customer customer = customerRepository.save(new Customer("420104199601021617", "13018060139", "my address", "my contactName"));
+        Customer customer = customerRepository.save(new Customer("420104********1617", "1301****139", "my address", "my contactName"));
         setupId = customer.getId();
     }
 
 
     @Test
     public void updateCustomer() throws Exception {
-        Customer customer = new Customer("my new userId", "my new mobile", "my new address", "my new contactName");
+        Customer customer = new Customer("420123********1617", "1304****139", "my new address", "my new contactName");
         mockMvc.perform(put("/api" + "/customers/{id}", setupId)
                 .content(objToJson(customer))
                 .contentType(contentType))
@@ -80,8 +80,8 @@ public class CustomerRepositoryTests {
                 .andReturn();
         mockMvc.perform(get("/api" + "/customers/{id}", setupId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", is("my new userId")))
-                .andExpect(jsonPath("$.mobile", is("my new mobile")))
+                .andExpect(jsonPath("$.userId", is("420123********1617")))
+                .andExpect(jsonPath("$.mobile", is("1304****139")))
                 .andExpect(jsonPath("$.address", is("my new address")))
                 .andExpect(jsonPath("$.contactName", is("my new contactName")));
     }
@@ -99,17 +99,17 @@ public class CustomerRepositoryTests {
         mockMvc.perform(get("/api" + "/customers/{id}", setupId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.userId", is("420104********1315")))
+                .andExpect(jsonPath("$.userId", is("420104********1617")))
                 .andExpect(jsonPath("$.type", is(1)))
                 .andExpect(jsonPath("$.contactName", is("my contactName")))
-                .andExpect(jsonPath("$.mobile", is("130*****139")));
+                .andExpect(jsonPath("$.mobile", is("1301****139")));
 
     }
 
 
     @Test()
     public void createCustomerOutOfBoundary() {
-        Customer customer = new Customer("420104199601021617", "my mobile", "my other address", "my contactName");
+        Customer customer = new Customer("420204********1617", "152*****345", "my other address", "my contactName");
         customer.setType(0);
         Set<ConstraintViolation<Customer>> constraintViolations =
                 validator.validate(customer);
@@ -129,20 +129,20 @@ public class CustomerRepositoryTests {
     @Test
     public void addCustomer() throws Exception {
         mockMvc.perform(post("/api" + "/customers")
-                .content(objToJson(new Customer("my userId", "my mobile", "my other address", "my other contactName")))
+                .content(objToJson(new Customer("420204********1617", "152*****345", "my other address", "my other contactName")))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
     }
 
     @Test
     public void addCustomerOutOfBoundary() throws Exception {
-        Customer customer = new Customer("my userId", "my mobile", "my other address", "my contactName");
+        Customer customer = new Customer("420204********1617", "1528*****345", "my other address", "my contactName");
         customer.setType(0);
         mockMvc.perform(post("/api" + "/customers").content(objToJson(customer)).contentType(contentType))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors[0].entity", is("Customer")))
-                .andExpect(jsonPath("errors[0].message", is("must be greater than or equal to 1")))
-                .andExpect(jsonPath("errors[0].property", is("type")))
+                .andExpect(jsonPath("errors[0].message", is("size must be between 11 and 11")))
+                .andExpect(jsonPath("errors[0].property", is("mobile")))
                 .andReturn();
         customer.setType(0);
         customer.setEmail("test");

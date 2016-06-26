@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.NumberFormat;
 
+import javax.annotation.Nullable;
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -87,6 +88,7 @@ public class Customer {
     private String contactName;
 
     @Email
+    @Nullable
     private String email;
 
 
