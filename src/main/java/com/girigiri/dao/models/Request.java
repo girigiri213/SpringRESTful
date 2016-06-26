@@ -1,7 +1,7 @@
 package com.girigiri.dao.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.girigiri.dao.constraints.StringDateFormat;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -22,10 +22,13 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    //TODO: use created instead of this
+    @JsonIgnore
     private Long time;
 
     private int predictPrice;
 
+    @StringDateFormat
     private String predictTime;
 
     @Min(1)

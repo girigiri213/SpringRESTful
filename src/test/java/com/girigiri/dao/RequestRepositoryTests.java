@@ -3,6 +3,7 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.Request;
+import com.girigiri.dao.services.RequestRepository;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -21,7 +22,7 @@ import javax.validation.ValidatorFactory;
 import java.util.Set;
 
 import static com.girigiri.utils.TestUtil.objToJson;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -75,6 +76,7 @@ public class RequestRepositoryTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.predictTime", is("2016-7-7")))
                 .andExpect(jsonPath("$.predictPrice", is(155)))
+                .andExpect(jsonPath("$").value(hasKey("created")))
                 .andExpect(jsonPath("$.state", is(1)));
     }
 
@@ -110,6 +112,10 @@ public class RequestRepositoryTests {
         mockMvc.perform(post("/api/requests").content(objToJson(request)).contentType(contentType))
                 .andExpect(status().isBadRequest());
         request.setState(0);
+        mockMvc.perform(post("/api/requests").content(objToJson(request)).contentType(contentType))
+                .andExpect(status().isBadRequest());
+        request.setState(1);
+        request.setPredictTime("3343q234");
         mockMvc.perform(post("/api/requests").content(objToJson(request)).contentType(contentType))
                 .andExpect(status().isBadRequest());
     }

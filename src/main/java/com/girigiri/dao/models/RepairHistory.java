@@ -2,7 +2,9 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.girigiri.dao.constraints.StringDateFormat;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
@@ -23,30 +25,30 @@ public class RepairHistory {
 
     private String name;
 
-    private String time;
+    @StringDateFormat
+    private String assignTime;
 
     private String checkHistory;
 
     private String repairHistory;
 
+    @StringDateFormat
     private String repairTime;
 
     private String workforce;
 
-    private String manPrice;
+    private int manPrice;
 
-    private String materialPrice;
+    private int materialPrice;
 
     private String promise;
 
     private String warning;
 
-    //TODO: limit state to 1, 2, 3 or 4
     @Max(4)
     @Min(1)
     private int repairState;
 
-    //TODO: limit state to 1, 2 or 3
     @Max(3)
     @Min(1)
     private int delayType;
@@ -106,12 +108,12 @@ public class RepairHistory {
         this.name = name;
     }
 
-    public String getTime() {
-        return time;
+    public String getAssignTime() {
+        return assignTime;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setAssignTime(String assignTime) {
+        this.assignTime = assignTime;
     }
 
     public String getCheckHistory() {
@@ -146,19 +148,19 @@ public class RepairHistory {
         this.workforce = workforce;
     }
 
-    public String getManPrice() {
+    public int getManPrice() {
         return manPrice;
     }
 
-    public void setManPrice(String manPrice) {
+    public void setManPrice(int manPrice) {
         this.manPrice = manPrice;
     }
 
-    public String getMaterialPrice() {
+    public int getMaterialPrice() {
         return materialPrice;
     }
 
-    public void setMaterialPrice(String materialPrice) {
+    public void setMaterialPrice(int materialPrice) {
         this.materialPrice = materialPrice;
     }
 
@@ -205,15 +207,12 @@ public class RepairHistory {
         if (delayType != that.delayType) return false;
         if (!id.equals(that.id)) return false;
         if (name != null ? !name.equals(that.name) : that.name != null) return false;
-        if (time != null ? !time.equals(that.time) : that.time != null) return false;
+        if (assignTime != null ? !assignTime.equals(that.assignTime) : that.assignTime != null) return false;
         if (checkHistory != null ? !checkHistory.equals(that.checkHistory) : that.checkHistory != null) return false;
         if (repairHistory != null ? !repairHistory.equals(that.repairHistory) : that.repairHistory != null)
             return false;
         if (repairTime != null ? !repairTime.equals(that.repairTime) : that.repairTime != null) return false;
         if (workforce != null ? !workforce.equals(that.workforce) : that.workforce != null) return false;
-        if (manPrice != null ? !manPrice.equals(that.manPrice) : that.manPrice != null) return false;
-        if (materialPrice != null ? !materialPrice.equals(that.materialPrice) : that.materialPrice != null)
-            return false;
         if (promise != null ? !promise.equals(that.promise) : that.promise != null) return false;
         return warning != null ? warning.equals(that.warning) : that.warning == null;
 
@@ -223,13 +222,13 @@ public class RepairHistory {
     public int hashCode() {
         int result = 0;
         result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (time != null ? time.hashCode() : 0);
+        result = 31 * result + (assignTime != null ? assignTime.hashCode() : 0);
         result = 31 * result + (checkHistory != null ? checkHistory.hashCode() : 0);
         result = 31 * result + (repairHistory != null ? repairHistory.hashCode() : 0);
         result = 31 * result + (repairTime != null ? repairTime.hashCode() : 0);
         result = 31 * result + (workforce != null ? workforce.hashCode() : 0);
-        result = 31 * result + (manPrice != null ? manPrice.hashCode() : 0);
-        result = 31 * result + (materialPrice != null ? materialPrice.hashCode() : 0);
+        result = 31 * result + manPrice;
+        result = 31 * result + materialPrice;
         result = 31 * result + (promise != null ? promise.hashCode() : 0);
         result = 31 * result + (warning != null ? warning.hashCode() : 0);
         result = 31 * result + repairState;
@@ -242,7 +241,7 @@ public class RepairHistory {
         return "RepairHistory{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", time='" + time + '\'' +
+                ", time='" + assignTime + '\'' +
                 ", checkHistory='" + checkHistory + '\'' +
                 ", repairHistory='" + repairHistory + '\'' +
                 ", repairTime='" + repairTime + '\'' +

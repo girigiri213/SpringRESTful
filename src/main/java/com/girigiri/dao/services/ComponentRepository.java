@@ -1,4 +1,4 @@
-package com.girigiri.dao;
+package com.girigiri.dao.services;
 
 import com.girigiri.dao.models.Component;
 import org.springframework.data.repository.PagingAndSortingRepository;

@@ -1,6 +1,7 @@
 package com.girigiri.dao;
 
 import com.girigiri.dao.models.Customer;
+import com.girigiri.dao.services.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
  * database loader for init.
  */
 //Comment this if you don't want any initial data.
-@Component
+//@Component
 public class DatabaseLoader implements CommandLineRunner {
 
     @Autowired

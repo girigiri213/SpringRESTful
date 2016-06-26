@@ -1,4 +1,4 @@
-package com.girigiri.dao;
+package com.girigiri.dao.services;
 
 import com.girigiri.dao.models.Manager;
 import org.springframework.data.repository.CrudRepository;

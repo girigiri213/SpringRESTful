@@ -2,6 +2,7 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.Customer;
+import com.girigiri.dao.services.CustomerRepository;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -124,6 +125,13 @@ public class CustomerRepositoryTests {
         assertEquals(1, constraintViolations.size());
         assertEquals("must be less than or equal to 4",
                 constraintViolations.iterator().next().getMessage());
+        customer.setType(1);
+        customer.setZip("4300234");
+        constraintViolations =
+                validator.validate(customer);
+        assertEquals(1, constraintViolations.size());
+        assertEquals("size must be between 6 and 6",
+                constraintViolations.iterator().next().getMessage());
     }
 
     @Test
@@ -137,7 +145,7 @@ public class CustomerRepositoryTests {
     @Test
     public void addCustomerOutOfBoundary() throws Exception {
         Customer customer = new Customer("420204********1617", "1528*****345", "my other address", "my contactName");
-        customer.setType(0);
+        customer.setType(1);
         mockMvc.perform(post("/api" + "/customers").content(objToJson(customer)).contentType(contentType))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors[0].entity", is("Customer")))

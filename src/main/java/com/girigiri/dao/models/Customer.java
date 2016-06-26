@@ -3,8 +3,6 @@ package com.girigiri.dao.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.Length;
-import org.springframework.format.annotation.NumberFormat;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
@@ -82,6 +80,7 @@ public class Customer {
     @NotNull
     private String address;
 
+    @Size(min = 6, max = 6)
     private String zip;
 
     @NotNull

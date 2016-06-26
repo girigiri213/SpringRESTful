@@ -1,7 +1,7 @@
 package com.girigiri.controller;
 
-import com.girigiri.dao.CustomerRepository;
-import com.girigiri.dao.DeviceRepository;
+import com.girigiri.dao.services.CustomerRepository;
+import com.girigiri.dao.services.DeviceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

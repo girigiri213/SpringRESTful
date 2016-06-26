@@ -2,6 +2,7 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.RepairHistory;
+import com.girigiri.dao.services.RepairHistoryRepository;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -136,10 +137,19 @@ public class RepairHistoryRepositoryTests {
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
         repairHistory.setDelayType(5);
-        repairHistory.setDelayType(4);
+        repairHistory.setRepairState(4);
         mockMvc.perform(post("/api/repairHistories")
                 .content(objToJson(repairHistory))
                 .contentType(contentType))
+                .andExpect(status().isBadRequest());
+        repairHistory.setDelayType(1);
+        repairHistory.setRepairState(1);
+        repairHistory.setAssignTime("1234-31-ef");
+        mockMvc.perform(post("/api/repairHistories").content(objToJson(repairHistory)).contentType(contentType))
+                .andExpect(status().isBadRequest());
+        repairHistory.setAssignTime("2016-01-02");
+        repairHistory.setRepairTime("12341esaf");
+        mockMvc.perform(post("/api/repairHistories").content(objToJson(repairHistory)).contentType(contentType))
                 .andExpect(status().isBadRequest());
     }
 
