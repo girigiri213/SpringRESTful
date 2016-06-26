@@ -1,9 +1,13 @@
 package com.girigiri.dao.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -22,41 +26,80 @@ public class Request {
 
     private int predictPrice;
 
-    private Long predictTime;
+    private String predictTime;
 
-    //TODO: limit the state to 1, 2 or 3
+    @Min(1)
+    @Max(3)
+    @NotNull
     private int state;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created", nullable = false)
     private Date created;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated", nullable = false)
     private Date updated;
 
     @Version
     @JsonIgnore
     private Long version;
 
-    @PrePersist  //Callback when item creates
+    @PrePersist
     protected void onCreate() {
-        updated = created = new Date();
+        created = updated = new Date();
     }
 
-    @PreUpdate   //Callback when item updates
+    @PreUpdate
     protected void onUpdate() {
         updated = new Date();
     }
 
+    public Long getCreated() {
+        return created.getTime();
+    }
 
-    public Request(Long time, int predictPrice, Long predictTime, int state) {
+    public void setCreated(Date created) {
+        if (created == null) {
+            return;
+        }
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Long getUpdated() {
+        return updated.getTime();
+    }
+
+    public Request() {
+        this(1);
+    }
+
+    public Request(int state) {
+        this.state = state;
+    }
+
+    public Request(Long time, int predictPrice, String predictTime, int state) {
         this.time = time;
         this.predictPrice = predictPrice;
         this.predictTime = predictTime;
         this.state = state;
     }
 
+    public Request(int predictPrice, String predictTime, int state) {
+        this(new Date().getTime(), predictPrice, predictTime, state);
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public int getPredictPrice() {
+        return predictPrice;
+    }
+
+    public void setPredictPrice(int predictPrice) {
+        this.predictPrice = predictPrice;
+    }
 
     public Long getTime() {
         return time;
@@ -74,11 +117,11 @@ public class Request {
         this.predictPrice = predictPrice;
     }
 
-    public Long getPredictTime() {
+    public String getPredictTime() {
         return predictTime;
     }
 
-    public void setPredictTime(Long predictTime) {
+    public void setPredictTime(String predictTime) {
         this.predictTime = predictTime;
     }
 

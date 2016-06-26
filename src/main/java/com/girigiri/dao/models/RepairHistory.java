@@ -1,5 +1,6 @@
 package com.girigiri.dao.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -51,30 +52,39 @@ public class RepairHistory {
     private int delayType;
 
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created", nullable = false)
-    private Date created;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated", nullable = false)
-    private Date updated;
-
     @Version
     @JsonIgnore
     private Long version;
-
-
-
-
+    private Date created;
+    private Date updated;
 
     @PrePersist
     protected void onCreate() {
-        updated = created = new Date();
+        created = updated = new Date();
     }
 
     @PreUpdate
     protected void onUpdate() {
         updated = new Date();
+    }
+
+    public Long getCreated() {
+        return created.getTime();
+    }
+
+    public void setCreated(Date created) {
+        if (created == null) {
+            return;
+        }
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Long getUpdated() {
+        return updated.getTime();
     }
 
 

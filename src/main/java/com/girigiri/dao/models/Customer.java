@@ -2,11 +2,15 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.Length;
+import org.springframework.format.annotation.NumberFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 /**
@@ -21,31 +25,57 @@ public class Customer {
     @GeneratedValue()
     private Long id;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created", nullable = false)
     private Date created;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated", nullable = false)
     private Date updated;
+
+    @PrePersist
+    protected void onCreate() {
+        created = updated = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updated = new Date();
+    }
+
+    public Long getCreated() {
+        return created.getTime();
+    }
+
+    public void setCreated(Date created) {
+        if (created == null) {
+            return;
+        }
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Long getUpdated() {
+        return updated.getTime();
+    }
 
     @Version
     @JsonIgnore
     private Long version;
 
     @NotNull
+    @Size(min = 18, max = 20)
     private String userId;
 
-    //TODO: Limit type to 1, 2, 3 or 4
     @Min(1)
     @Max(4)
     private int type;
 
     private String companyName;
 
+    @Size(min = 8, max = 12)
     private String phone;
 
     @NotNull
+    @Size(min = 11, max = 11)
     private String mobile;
 
     @NotNull
@@ -56,7 +86,7 @@ public class Customer {
     @NotNull
     private String contactName;
 
-
+    @Email
     private String email;
 
 
@@ -70,6 +100,7 @@ public class Customer {
     public Customer(Long id, String userId, String mobile, String address, String contactName) {
         this(id, userId, 1, null, null, mobile, address, null, contactName, null);
     }
+
 
     public Customer(Long id, String userId, int type, String companyName, String phone, String mobile, String address, String zip, String contactName, String email) {
         this.id = id;
@@ -176,32 +207,4 @@ public class Customer {
 
 
 
-    @PrePersist
-    protected void onCreate() {
-        updated = created = new Date();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updated = new Date();
-    }
-
-
-
-    @Override
-    public String toString() {
-        return "Customer{" +
-                "id=" + id +
-                ", creation time=" + created +
-                ", userId=" + userId +
-                ", type=" + type +
-                ", companyName='" + companyName + '\'' +
-                ", phone='" + phone + '\'' +
-                ", mobile='" + mobile + '\'' +
-                ", address='" + address + '\'' +
-                ", zip='" + zip + '\'' +
-                ", contactName='" + contactName + '\'' +
-                ", email='" + email + '\'' +
-                '}';
-    }
 }

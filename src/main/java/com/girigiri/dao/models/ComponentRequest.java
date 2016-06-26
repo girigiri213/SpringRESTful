@@ -1,5 +1,6 @@
 package com.girigiri.dao.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
@@ -28,21 +29,12 @@ public class ComponentRequest {
     private int size;
 
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created", nullable = false)
     private Date created;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated", nullable = false)
     private Date updated;
-
-    @Version
-    @JsonIgnore
-    private Long version;
 
     @PrePersist
     protected void onCreate() {
-        updated = created = new Date();
+        created = updated = new Date();
     }
 
     @PreUpdate
@@ -50,8 +42,57 @@ public class ComponentRequest {
         updated = new Date();
     }
 
+    public Long getCreated() {
+        return created.getTime();
+    }
+
+    public void setCreated(Date created) {
+        if (created == null) {
+            return;
+        }
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Long getUpdated() {
+        return updated.getTime();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+
+    @Version
+    @JsonIgnore
+    private Long version;
 
 
 
-
+    public Long getId() {
+        return id;
+    }
 }

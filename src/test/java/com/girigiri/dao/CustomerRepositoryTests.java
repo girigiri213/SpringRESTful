@@ -11,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.result.PrintingResultHandler;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.validation.ConstraintViolation;
@@ -101,17 +99,17 @@ public class CustomerRepositoryTests {
         mockMvc.perform(get("/api" + "/customers/{id}", setupId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.userId", is("420104199601021617")))
+                .andExpect(jsonPath("$.userId", is("420104********1315")))
                 .andExpect(jsonPath("$.type", is(1)))
                 .andExpect(jsonPath("$.contactName", is("my contactName")))
-                .andExpect(jsonPath("$.mobile", is("13018060139")));
+                .andExpect(jsonPath("$.mobile", is("130*****139")));
 
     }
 
 
     @Test()
     public void createCustomerOutOfBoundary() {
-        Customer customer = new Customer("my userId", "my mobile", "my other address", "my contactName");
+        Customer customer = new Customer("420104199601021617", "my mobile", "my other address", "my contactName");
         customer.setType(0);
         Set<ConstraintViolation<Customer>> constraintViolations =
                 validator.validate(customer);
@@ -146,6 +144,10 @@ public class CustomerRepositoryTests {
                 .andExpect(jsonPath("errors[0].message", is("must be greater than or equal to 1")))
                 .andExpect(jsonPath("errors[0].property", is("type")))
                 .andReturn();
+        customer.setType(0);
+        customer.setEmail("test");
+        mockMvc.perform(post("/api" + "/customers").content(objToJson(customer)).contentType(contentType))
+                .andExpect(status().isBadRequest());
     }
 
 

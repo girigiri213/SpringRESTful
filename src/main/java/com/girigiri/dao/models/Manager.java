@@ -1,15 +1,14 @@
 package com.girigiri.dao.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Arrays;
+import java.util.Date;
 
 
 /**
@@ -43,6 +42,39 @@ public class Manager {
 
     private @JsonIgnore
     String password;
+
+
+    private Date created;
+    private Date updated;
+
+    @PrePersist
+    protected void onCreate() {
+        created = updated = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updated = new Date();
+    }
+
+    public Long getCreated() {
+        return created.getTime();
+    }
+
+    public void setCreated(Date created) {
+        if (created == null) {
+            return;
+        }
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Long getUpdated() {
+        return updated.getTime();
+    }
 
     private String[] roles;
 
@@ -84,12 +116,4 @@ public class Manager {
     }
 
 
-    @Override
-    public String toString() {
-        return "Manager{" +
-                "name='" + name + '\'' +
-                ", id=" + id +
-                ", roles=" + Arrays.toString(roles) +
-                '}';
-    }
 }
