@@ -2,11 +2,7 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.Customer;
-import com.girigiri.utils.TestUtil;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +12,22 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.result.PrintingResultHandler;
 import org.springframework.web.context.WebApplicationContext;
 
-import static com.girigiri.utils.TestUtil.getResourceIdFromUrl;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.util.Set;
+
 import static com.girigiri.utils.TestUtil.objToJson;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
@@ -46,6 +47,7 @@ public class CustomerRepositoryTests {
     private static final String SUBTYPE = "hal+json";
 
     private MockMvc mockMvc;
+    private static Validator validator;
     @Autowired
     private WebApplicationContext webApplicationContext;
 
@@ -54,33 +56,31 @@ public class CustomerRepositoryTests {
 
     private long setupId;
 
+    @BeforeClass
+    public static void onCreate() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
     @Before
     public void setup() {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
-        customerRepository.deleteAll();
         Customer customer = customerRepository.save(new Customer("420104199601021617", "13018060139", "my address", "my contactName"));
         setupId = customer.getId();
     }
 
 
     @Test
-    public void addCustomerAndUpdate() throws Exception {
-        Customer customer = new Customer("my userId", "my mobile", "my address", "my contactName");
-        MvcResult result = mockMvc.perform(post("/api" + "/customers")
-        .content(objToJson(customer))
-        .contentType(contentType))
-                .andExpect(status().isCreated())
-                .andReturn();
-        long id = getResourceIdFromUrl(result.getResponse().getRedirectedUrl());
-        Customer c2 = new Customer("my new userId", "my new mobile", "my new address", "my new contactName");
-        mockMvc.perform(put("/api" + "/customers/{id}", id)
-                .content(objToJson(c2))
+    public void updateCustomer() throws Exception {
+        Customer customer = new Customer("my new userId", "my new mobile", "my new address", "my new contactName");
+        mockMvc.perform(put("/api" + "/customers/{id}", setupId)
+                .content(objToJson(customer))
                 .contentType(contentType))
                 .andExpect(status().isNoContent())
                 .andReturn();
-        mockMvc.perform(get("/api" + "/customers/{id}", id))
+        mockMvc.perform(get("/api" + "/customers/{id}", setupId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId", is("my new userId")))
                 .andExpect(jsonPath("$.mobile", is("my new mobile")))
@@ -108,12 +108,44 @@ public class CustomerRepositoryTests {
 
     }
 
+
+    @Test()
+    public void createCustomerOutOfBoundary() {
+        Customer customer = new Customer("my userId", "my mobile", "my other address", "my contactName");
+        customer.setType(0);
+        Set<ConstraintViolation<Customer>> constraintViolations =
+                validator.validate(customer);
+        assertEquals(1, constraintViolations.size());
+        assertEquals(
+                "must be greater than or equal to 1",
+                constraintViolations.iterator().next().getMessage()
+        );
+        customer.setType(5);
+        constraintViolations =
+                validator.validate(customer);
+        assertEquals(1, constraintViolations.size());
+        assertEquals("must be less than or equal to 4",
+                constraintViolations.iterator().next().getMessage());
+    }
+
     @Test
-    public void addNewCustomer() throws Exception {
+    public void addCustomer() throws Exception {
         mockMvc.perform(post("/api" + "/customers")
                 .content(objToJson(new Customer("my userId", "my mobile", "my other address", "my other contactName")))
                 .contentType(contentType))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void addCustomerOutOfBoundary() throws Exception {
+        Customer customer = new Customer("my userId", "my mobile", "my other address", "my contactName");
+        customer.setType(0);
+        mockMvc.perform(post("/api" + "/customers").content(objToJson(customer)).contentType(contentType))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("errors[0].entity", is("Customer")))
+                .andExpect(jsonPath("errors[0].message", is("must be greater than or equal to 1")))
+                .andExpect(jsonPath("errors[0].property", is("type")))
+                .andReturn();
     }
 
 
@@ -128,17 +160,6 @@ public class CustomerRepositoryTests {
     public void onDestroy() {
         customerRepository.deleteAll();
     }
-
-
-
-
-
-
-
-
-
-
-
 
 
 }

@@ -7,8 +7,10 @@ import org.springframework.stereotype.Component;
 
 /**
  * Created by JianGuo on 6/25/16.
+ * database loader for init.
  */
-@Component
+//Comment this if you don't want any initial data.
+//@Component
 public class DatabaseLoader implements CommandLineRunner {
 
     @Autowired

@@ -37,6 +37,8 @@ public class Customer {
     private String userId;
 
     //TODO: Limit type to 1, 2, 3 or 4
+    @Min(1)
+    @Max(4)
     private int type;
 
     private String companyName;

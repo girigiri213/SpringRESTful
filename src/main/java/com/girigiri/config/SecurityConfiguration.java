@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 /**
  * Created by JianGuo on 6/25/16.
+ * Security configuration for this system
  */
 @Configuration
 @EnableWebSecurity

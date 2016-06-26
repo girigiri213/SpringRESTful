@@ -78,7 +78,10 @@ public class RepairHistory {
     }
 
 
-    public RepairHistory() {}
+    public RepairHistory() {
+        this.repairState = 1;
+        this.delayType = 1;
+    }
 
 
     public Long getId() {
