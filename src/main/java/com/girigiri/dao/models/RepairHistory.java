@@ -2,12 +2,16 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.girigiri.dao.constraints.StringDateFormat;
+import com.girigiri.dao.services.ComponentRepository;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by JianGuo on 6/24/16.
@@ -51,10 +55,17 @@ public class RepairHistory {
     @Min(1)
     private int delayType;
 
+    @NotNull
+    @OneToOne
+    private Request request;
+
+    @OneToMany(mappedBy = "repairHistory", cascade = CascadeType.ALL)
+    private Set<ComponentRequest> componentRequests;
 
     @Version
     @JsonIgnore
     private Long version;
+
     private Date created;
     private Date updated;
 
@@ -68,29 +79,27 @@ public class RepairHistory {
         updated = new Date();
     }
 
-    public Long getCreated() {
-        return created.getTime();
-    }
-
-    public void setCreated(Date created) {
-        if (created == null) {
-            return;
-        }
-        this.created = created;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
-    public Long getUpdated() {
-        return updated.getTime();
-    }
-
 
     public RepairHistory() {
-        this.repairState = 1;
-        this.delayType = 1;
+
+    }
+
+    public RepairHistory(int repairState, int delayType, Request request) {
+        this.repairState = repairState;
+        this.delayType = delayType;
+        this.request = request;
+    }
+
+
+    public RepairHistory(int repairState, int delayType, Request request, Set<ComponentRequest> componentRequests) {
+        this.repairState = repairState;
+        this.delayType = delayType;
+        this.request = request;
+        this.componentRequests = componentRequests;
+    }
+
+    public RepairHistory(Request request) {
+        this(1, 1, request, null);
     }
 
 
@@ -194,6 +203,23 @@ public class RepairHistory {
         this.delayType = delayType;
     }
 
+
+    public Request getRequest() {
+        return request;
+    }
+
+    public void setRequest(Request request) {
+        this.request = request;
+    }
+
+    public Set<ComponentRequest> getComponentRequests() {
+        return componentRequests;
+    }
+
+    public void setComponentRequests(Set<ComponentRequest> componentRequests) {
+        this.componentRequests = componentRequests;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -214,6 +240,25 @@ public class RepairHistory {
         if (promise != null ? !promise.equals(that.promise) : that.promise != null) return false;
         return warning != null ? warning.equals(that.warning) : that.warning == null;
 
+    }
+
+    public Long getCreated() {
+        return created.getTime();
+    }
+
+    public void setCreated(Date created) {
+        if (created == null) {
+            return;
+        }
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Long getUpdated() {
+        return updated.getTime();
     }
 
     @Override

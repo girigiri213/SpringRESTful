@@ -36,6 +36,10 @@ public class ComponentRequest {
     private Date created;
     private Date updated;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "HIS_ID", nullable = false)
+    private RepairHistory repairHistory;
+
     @PrePersist
     protected void onCreate() {
         created = updated = new Date();
@@ -93,18 +97,18 @@ public class ComponentRequest {
         return id;
     }
 
-    public ComponentRequest() {}
+    public ComponentRequest() {
+    }
 
-    public ComponentRequest(String name, String serial, int size) {
+
+    public ComponentRequest(String name, String serial, int size, RepairHistory repairHistory) {
         this.name = name;
         this.serial = serial;
         this.size = size;
+        this.repairHistory = repairHistory;
     }
 
-    public ComponentRequest(String name, int size) {
-        this.name = name;
-        this.size = size;
-    }
+
 
 
     @Override

@@ -43,6 +43,12 @@ public class Request {
     @JsonIgnore
     private Long version;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Customer customer;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private Device device;
+
     @PrePersist
     protected void onCreate() {
         created = updated = new Date();
@@ -53,42 +59,21 @@ public class Request {
         updated = new Date();
     }
 
-    public Long getCreated() {
-        return created.getTime();
-    }
-
-    public void setCreated(Date created) {
-        if (created == null) {
-            return;
-        }
-        this.created = created;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
-    public Long getUpdated() {
-        return updated.getTime();
-    }
-
     public Request() {
-        this(1);
+
     }
 
-    public Request(int state) {
-        this.state = state;
+    public Request(int predictPrice, String predictTime, int state, Customer customer, Device device) {
+        this(new Date().getTime(), predictPrice, predictTime, state, customer, device);
     }
 
-    public Request(Long time, int predictPrice, String predictTime, int state) {
+    public Request(Long time, int predictPrice, String predictTime, int state, Customer customer, Device device) {
         this.time = time;
         this.predictPrice = predictPrice;
         this.predictTime = predictTime;
         this.state = state;
-    }
-
-    public Request(int predictPrice, String predictTime, int state) {
-        this(new Date().getTime(), predictPrice, predictTime, state);
+        this.customer = customer;
+        this.device = device;
     }
 
 
@@ -135,6 +120,44 @@ public class Request {
     public void setState(int state) {
         this.state = state;
     }
+
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Device getDevice() {
+        return device;
+    }
+
+    public void setDevice(Device device) {
+        this.device = device;
+    }
+
+
+    public Long getCreated() {
+        return created.getTime();
+    }
+
+    public void setCreated(Date created) {
+        if (created == null) {
+            return;
+        }
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Long getUpdated() {
+        return updated.getTime();
+    }
+
 
     @Override
     public String toString() {
