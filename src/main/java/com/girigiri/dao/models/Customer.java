@@ -12,6 +12,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -95,9 +96,30 @@ public class Customer {
     private String email;
 
     //// FIXME: 6/28/16 Error when delete a customer
-//    @JsonManagedReference
-    @OneToMany(cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "customer")
-    private List<Request> requests;
+    @OneToMany(mappedBy = "customer")
+    private List<Request> requests = new ArrayList<>();
+
+    public void setRequests(List<Request> requests) {
+        this.requests = requests;
+    }
+
+    public List<Request> getRequests() {
+        return new ArrayList<>(requests);
+    }
+
+
+    public void addRequest(Request request) {
+        if (requests.contains(request)) return;
+        requests.add(request);
+        request.setCustomer(this);
+    }
+
+    public void removeRequest(Request request) {
+        if (!requests.contains(request)) return;
+        requests.remove(request);
+        request.setCustomer(null);
+    }
+
 
 
 
@@ -216,16 +238,6 @@ public class Customer {
     }
 
 
-    public void setRequests(List<Request> requests) {
-        this.requests = requests;
-    }
-
-
-//    @JsonBackReference
-    public List<Request> getRequests() {
-        return requests;
-    }
-
 
     @Override
     public String toString() {
@@ -251,24 +263,8 @@ public class Customer {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         Customer customer = (Customer) o;
-
-        if (type != customer.type) return false;
-        if (id != null ? !id.equals(customer.id) : customer.id != null) return false;
-        if (created != null ? !created.equals(customer.created) : customer.created != null) return false;
-        if (updated != null ? !updated.equals(customer.updated) : customer.updated != null) return false;
-        if (version != null ? !version.equals(customer.version) : customer.version != null) return false;
-        if (userId != null ? !userId.equals(customer.userId) : customer.userId != null) return false;
-        if (companyName != null ? !companyName.equals(customer.companyName) : customer.companyName != null)
-            return false;
-        if (phone != null ? !phone.equals(customer.phone) : customer.phone != null) return false;
-        if (mobile != null ? !mobile.equals(customer.mobile) : customer.mobile != null) return false;
-        if (address != null ? !address.equals(customer.address) : customer.address != null) return false;
-        if (zip != null ? !zip.equals(customer.zip) : customer.zip != null) return false;
-        if (contactName != null ? !contactName.equals(customer.contactName) : customer.contactName != null)
-            return false;
-        return email != null ? email.equals(customer.email) : customer.email == null;
+        return id != null ? !id.equals(customer.id) : customer.id != null;
 
     }
 

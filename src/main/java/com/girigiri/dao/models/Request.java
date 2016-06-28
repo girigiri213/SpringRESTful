@@ -44,12 +44,52 @@ public class Request {
     @JsonIgnore
     private Long version;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-//    @JoinColumn(name = "CUS_ID", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "CUS_ID")
     private Customer customer;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer newCustomer) {
+        if (sameAsFormer(newCustomer))
+            return;
+        Customer oldCustomer = this.customer;
+        this.customer = newCustomer;
+        if (oldCustomer != null) {
+            oldCustomer.removeRequest(this);
+        }
+        if (newCustomer != null) {
+            newCustomer.addRequest(this);
+        }
+    }
+
+    private boolean sameAsFormer(Customer customer) {
+        return this.customer == null ?
+                customer == null : this.customer.equals(customer);
+    }
+
+
+    @OneToOne
     private Device device;
+
+
+    public Device getDevice() {
+        return device;
+    }
+
+    public void setDevice(Device newDevice) {
+        if (sameAsFormer(newDevice)) return;
+        this.device = newDevice;
+    }
+
+    private boolean sameAsFormer(Device newDevice) {
+        return device == null ?
+                newDevice == null : device.equals(newDevice);
+    }
+
 
     @PrePersist
     protected void onCreate() {
@@ -67,6 +107,13 @@ public class Request {
 
     public Request(int predictPrice, String predictTime, int state, Customer customer, Device device) {
         this(new Date().getTime(), predictPrice, predictTime, state, customer, device);
+    }
+
+    public Request(int predictPrice, String predictTime, int state) {
+        this.predictPrice =predictPrice;
+        this.predictTime = predictTime;
+        this.state = state;
+        this.time = new Date().getTime();
     }
 
     public Request(Long time, int predictPrice, String predictTime, int state, Customer customer, Device device) {
@@ -123,22 +170,8 @@ public class Request {
         this.state = state;
     }
 
-//    @JsonBackReference(value = "customer")
-    public Customer getCustomer() {
-        return customer;
-    }
 
-    public void setCustomer( Customer customer) {
-        this.customer = customer;
-    }
 
-    public Device getDevice() {
-        return device;
-    }
-
-    public void setDevice(Device device) {
-        this.device = device;
-    }
 
 
     public Long getCreated() {

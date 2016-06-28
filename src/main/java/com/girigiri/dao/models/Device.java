@@ -65,7 +65,6 @@ public class Device {
 
     private String other;
 
-
     private Date created;
     private Date updated;
 
