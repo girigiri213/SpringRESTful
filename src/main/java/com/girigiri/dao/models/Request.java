@@ -1,9 +1,6 @@
 package com.girigiri.dao.models;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.girigiri.dao.constraints.StringDateFormat;
 import lombok.Data;
 
@@ -44,7 +41,8 @@ public class Request {
     @JsonIgnore
     private Long version;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.MERGE})
+    //TODO:if this request is deleted, customer will not be deleted
     @JoinColumn(name = "CUS_ID")
     private Customer customer;
 
@@ -53,26 +51,22 @@ public class Request {
         return customer;
     }
 
+    @ManyToOne(cascade = {CascadeType.MERGE})
     public void setCustomer(Customer newCustomer) {
-        if (sameAsFormer(newCustomer))
-            return;
-        Customer oldCustomer = this.customer;
+        if (sameAsFormer(newCustomer)) return;
         this.customer = newCustomer;
-        if (oldCustomer != null) {
-            oldCustomer.removeRequest(this);
-        }
-        if (newCustomer != null) {
-            newCustomer.addRequest(this);
-        }
     }
+
 
     private boolean sameAsFormer(Customer customer) {
         return this.customer == null ?
-                customer == null : this.customer.equals(customer);
+               customer == null : this.customer.equals(customer);
+
     }
 
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    //TODO:if this request is deleted, device will be deleted too
     private Device device;
 
 
@@ -80,6 +74,7 @@ public class Request {
         return device;
     }
 
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     public void setDevice(Device newDevice) {
         if (sameAsFormer(newDevice)) return;
         this.device = newDevice;

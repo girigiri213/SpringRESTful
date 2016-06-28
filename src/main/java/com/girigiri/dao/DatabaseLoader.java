@@ -41,15 +41,22 @@ public class DatabaseLoader implements CommandLineRunner {
         request.setDevice(device);
         request.setCustomer(customer);
         customerRepository.save(customer);
-        deviceRepository.save(device);
         requestRepository.save(request);
 
+        Customer customer1 = new Customer("420104199601021617", "13018060139", "my new address", "my new contactName");
+        Request request2 = new Request(450, "2016-4-5", 2);
+
+        Device device2 = new Device(1, "some other error", 2);
+        request2.setDevice(device2);
+        request2.setCustomer(customer1);
+        customerRepository.save(customer1);
+        requestRepository.save(request2);
 
         Request request1 = new Request(200, "2014-13-2", 2);
         request1.setCustomer(customer);
         Device device1 = new Device(1, "some new error", 2);
-        deviceRepository.save(device1);
         request1.setDevice(device1);
+
         requestRepository.save(request1);
 
     }
