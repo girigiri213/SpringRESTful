@@ -41,7 +41,7 @@ public class Request {
     @JsonIgnore
     private Long version;
 
-    @ManyToOne(cascade = {CascadeType.MERGE})
+    @ManyToOne(cascade={CascadeType.MERGE}, fetch=FetchType.EAGER)
     //TODO:if this request is deleted, customer will not be deleted
     @JoinColumn(name = "CUS_ID")
     private Customer customer;
@@ -51,7 +51,7 @@ public class Request {
         return customer;
     }
 
-    @ManyToOne(cascade = {CascadeType.MERGE})
+    @ManyToOne(cascade={CascadeType.MERGE}, fetch=FetchType.EAGER)
     public void setCustomer(Customer newCustomer) {
         if (sameAsFormer(newCustomer)) return;
         this.customer = newCustomer;

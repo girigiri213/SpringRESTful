@@ -1,8 +1,11 @@
 package com.girigiri.dao.services;
 
+import com.girigiri.dao.models.Customer;
 import com.girigiri.dao.models.Request;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,5 +17,9 @@ import static javafx.scene.input.KeyCode.T;
  */
 public interface RequestRepository extends PagingAndSortingRepository<Request, Long>{
 
-    List<Request> removeByCustomer(int customer);
+    @RestResource(exported = false)
+    @Transactional
+    @Modifying
+    List<Request> removeByCustomer(Customer customer);
+
 }

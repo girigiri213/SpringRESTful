@@ -8,7 +8,7 @@ import org.springframework.http.MediaType;
  * Utils for Unit test
  */
 public class TestUtil {
-    private final static String SUBTYPE = "json";
+    private final static String SUBTYPE = "hal+json";
 
     public static MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
             SUBTYPE);

@@ -2,7 +2,11 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.Customer;
+import com.girigiri.dao.models.Device;
+import com.girigiri.dao.models.Request;
 import com.girigiri.dao.services.CustomerRepository;
+import com.girigiri.dao.services.DeviceRepository;
+import com.girigiri.dao.services.RequestRepository;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -11,6 +15,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.validation.ConstraintViolation;
@@ -36,7 +41,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SpringMvcApplication.class)
 @WebAppConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class CustomerRepositoryTests {
 
 
@@ -48,7 +52,13 @@ public class CustomerRepositoryTests {
     @Autowired
     private CustomerRepository customerRepository;
 
-    private long setupId;
+    @Autowired
+    private RequestRepository requestRepository;
+
+
+    private Customer rst;
+
+    private Request request;
 
     @BeforeClass
     public static void onCreate() {
@@ -61,25 +71,31 @@ public class CustomerRepositoryTests {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
-        Customer customer = customerRepository.save(new Customer("420104********1617", "1301****139", "my address", "my contactName"));
-        setupId = customer.getId();
+
+        Customer customer = new Customer("420104199601021617", "13018060139", "my address", "my contactName");
+        Device device = new Device(1, "some error", 1);
+        Request tmp = new Request(155, "2016-7-7", 1);
+        tmp.setDevice(device);
+        tmp.setCustomer(customer);
+        rst = customerRepository.save(customer);
+        request = requestRepository.save(tmp);
     }
 
 
     @Test
-    public void updateCustomer() throws Exception {
+    public void updateCustomerAndUpdatedInRequest() throws Exception {
         Customer customer = new Customer("420123********1617", "1304****139", "my new address", "my new contactName");
-        mockMvc.perform(put("/api" + "/customers/{id}", setupId)
+        mockMvc.perform(put("/api" + "/customers/{id}", rst.getId())
                 .content(objToJson(customer))
                 .contentType(contentType))
                 .andExpect(status().isNoContent())
                 .andReturn();
-        mockMvc.perform(get("/api" + "/customers/{id}", setupId))
+        mockMvc.perform(get("/api" + "/requests/{id}/customer", request.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId", is("420123********1617")))
                 .andExpect(jsonPath("$.mobile", is("1304****139")))
                 .andExpect(jsonPath("$.address", is("my new address")))
-                .andExpect(jsonPath("$.contactName", is("my new contactName")));
+            .andExpect(jsonPath("$.contactName", is("my new contactName")));
     }
 
     @Test
@@ -92,13 +108,13 @@ public class CustomerRepositoryTests {
 
     @Test
     public void readOneCustomer() throws Exception {
-        mockMvc.perform(get("/api" + "/customers/{id}", setupId))
+        mockMvc.perform(get("/api" + "/customers/{id}", rst.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
-                .andExpect(jsonPath("$.userId", is("420104********1617")))
-                .andExpect(jsonPath("$.type", is(1)))
-                .andExpect(jsonPath("$.contactName", is("my contactName")))
-                .andExpect(jsonPath("$.mobile", is("1301****139")));
+                .andExpect(jsonPath("$.userId", is(rst.getUserId())))
+                .andExpect(jsonPath("$.type", is(rst.getType())))
+                .andExpect(jsonPath("$.contactName", is(rst.getContactName())))
+                .andExpect(jsonPath("$.mobile", is(rst.getMobile())));
 
     }
 
@@ -141,12 +157,13 @@ public class CustomerRepositoryTests {
     public void addCustomerOutOfBoundary() throws Exception {
         Customer customer = new Customer("420204********1617", "1528*****345", "my other address", "my contactName");
         customer.setType(1);
-        mockMvc.perform(post("/api" + "/customers").content(objToJson(customer)).contentType(contentType))
+        MvcResult result = mockMvc.perform(post("/api" + "/customers").content(objToJson(customer)).contentType(contentType))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errors[0].entity", is("Customer")))
                 .andExpect(jsonPath("errors[0].message", is("size must be between 11 and 11")))
                 .andExpect(jsonPath("errors[0].property", is("mobile")))
                 .andReturn();
+//        System.err.println(result.getResponse().getContentAsString());
         customer.setType(0);
         customer.setEmail("test");
         mockMvc.perform(post("/api" + "/customers").content(objToJson(customer)).contentType(contentType))
@@ -155,14 +172,21 @@ public class CustomerRepositoryTests {
 
 
     @Test
-    public void deleteCustomer() throws Exception {
-        mockMvc.perform(delete("/api" + "/customers" + "/" + setupId))
+    public void deleteCustomerWithRequestsShouldDeleteOtherRequestsAndDevices() throws Exception {
+        mockMvc.perform(delete("/api/customers/{id}",rst.getId()))
                 .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/requests/{id}", request.getId()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/customers/{id}", rst.getId()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/devices/{id}", request.getDevice().getId()))
+                .andExpect(status().isNotFound());
     }
 
 
     @After
     public void onDestroy() {
+        requestRepository.deleteAll();
         customerRepository.deleteAll();
     }
 

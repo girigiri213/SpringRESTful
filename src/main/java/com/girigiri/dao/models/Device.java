@@ -21,7 +21,6 @@ public class Device {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-
     @NotNull
     @Min(1)
     @Max(5)

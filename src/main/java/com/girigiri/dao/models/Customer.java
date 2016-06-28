@@ -95,7 +95,7 @@ public class Customer {
 //    //// FIXME: 6/28/16 Error when delete a customer
 //    @OneToMany(mappedBy = "customer")
 //    private List<Request> requests = new ArrayList<>();
-
+//
 //    public void setRequests(List<Request> requests) {
 //        this.requests = requests;
 //    }
