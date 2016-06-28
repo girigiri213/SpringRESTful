@@ -56,7 +56,7 @@ public class RepairHistory {
     private int delayType;
 
     @NotNull
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.ALL})
     private Request request;
 
     @OneToMany(mappedBy = "repairHistory", cascade = CascadeType.ALL)

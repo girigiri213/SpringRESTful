@@ -1,6 +1,8 @@
 package com.girigiri.dao.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import org.hibernate.validator.constraints.Email;
 
@@ -11,6 +13,8 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by JianGuo on 6/24/16.
@@ -90,18 +94,23 @@ public class Customer {
     @Nullable
     private String email;
 
+    //// FIXME: 6/28/16 Error when delete a customer
+//    @JsonManagedReference
+    @OneToMany(cascade = {CascadeType.ALL, CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "customer")
+    private List<Request> requests;
 
-    public Customer(String userId, String mobile, String address, String contactName) {
-        this(userId, 1, null, null, mobile, address, null, contactName, null);
-    }
+
 
     public Customer() {}
 
 
-    public Customer(Long id, String userId, String mobile, String address, String contactName) {
-        this(id, userId, 1, null, null, mobile, address, null, contactName, null);
+    public Customer(String userId, String mobile, String address, String contactName) {
+        this.userId = userId;
+        this.mobile = mobile;
+        this.address = address;
+        this.contactName = contactName;
+        this.type = 1;
     }
-
 
     public Customer(Long id, String userId, int type, String companyName, String phone, String mobile, String address, String zip, String contactName, String email) {
         this.id = id;
@@ -206,6 +215,37 @@ public class Customer {
         this.email = email;
     }
 
+
+    public void setRequests(List<Request> requests) {
+        this.requests = requests;
+    }
+
+
+//    @JsonBackReference
+    public List<Request> getRequests() {
+        return requests;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", created=" + created +
+                ", updated=" + updated +
+                ", version=" + version +
+                ", userId='" + userId + '\'' +
+                ", type=" + type +
+                ", companyName='" + companyName + '\'' +
+                ", phone='" + phone + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", address='" + address + '\'' +
+                ", zip='" + zip + '\'' +
+                ", contactName='" + contactName + '\'' +
+                ", email='" + email + '\'' +
+                ", requests=" + requests +
+                '}';
+    }
 
     @Override
     public boolean equals(Object o) {

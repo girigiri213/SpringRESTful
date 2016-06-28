@@ -2,22 +2,32 @@ package com.girigiri.dao;
 
 
 import com.girigiri.SpringMvcApplication;
+import com.girigiri.dao.models.Customer;
+import com.girigiri.dao.models.Device;
 import com.girigiri.dao.models.Request;
+import com.girigiri.dao.services.CustomerRepository;
 import com.girigiri.dao.services.RequestRepository;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Set;
 
 import static com.girigiri.utils.TestUtil.contentType;
@@ -48,6 +58,10 @@ public class RequestRepositoryTests {
     @Autowired
     private RequestRepository requestRepository;
 
+    @Autowired
+    private CustomerRepository customerRepository;
+
+
     private static Validator validator;
     private long setupId;
 
@@ -58,12 +72,16 @@ public class RequestRepositoryTests {
         validator = factory.getValidator();
     }
 
+
+
+
+
     @Before
     public void setup() {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
-        Request request = requestRepository.save(new Request(155, "2016-7-7", 1));
+        Request request = requestRepository.save(mock());
         setupId = request.getId();
     }
 
@@ -79,15 +97,19 @@ public class RequestRepositoryTests {
 
     @Test
     public void addRequest() throws Exception {
-        Request request = new Request(180, "2016-8-4", 2);
-        mockMvc.perform(post("/api/requests").content(objToJson(request))
+        Request request = mock();
+        String json = objToJson(request);
+        System.err.println("request json: " + json);
+        MvcResult result = mockMvc.perform(post("/api/requests").content(json)
                 .contentType(contentType))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated()).andReturn();
+        System.err.println("response: " + result.getResponse().getContentAsString());
     }
 
     @Test
     public void createRequestOutOfBoundary() {
-        Request request = new Request(290, "2016-5-4", 4);
+        Request request = mock();
+        request.setState(4);
         Set<ConstraintViolation<Request>> constraintViolations =
                 validator.validate(request);
         assertEquals(constraintViolations.size(), 1);
@@ -105,7 +127,8 @@ public class RequestRepositoryTests {
 
     @Test
     public void addRequestOutOfBoundary() throws Exception {
-        Request request = new Request(300, "2017-4-5", 4);
+        Request request = mock();
+        request.setState(4);
         mockMvc.perform(post("/api/requests").content(objToJson(request)).contentType(contentType))
                 .andExpect(status().isBadRequest());
         request.setState(0);
@@ -119,21 +142,30 @@ public class RequestRepositoryTests {
 
     @Test
     public void updateRequest() throws Exception {
-        Request request = new Request(450, "2018-3-4", 1);
+        Request request = mock();
         mockMvc.perform(put("/api" + "/requests/{id}", setupId)
                 .content(objToJson(request))
                 .contentType(contentType))
                 .andExpect(status().isNoContent())
                 .andReturn();
-        mockMvc.perform(get("/api" + "/requests/{id}", setupId))
+        request.getCustomer().setType(2);
+        request.getDevice().setType(3);
+        MvcResult result = mockMvc.perform(get("/api" + "/requests/{id}", setupId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.predictPrice", is(450)))
-                .andExpect(jsonPath("$.predictTime", is("2018-3-4")))
-                .andExpect(jsonPath("$.state", is(1)));
+                .andExpect(jsonPath("$.predictPrice", is(request.getPredictPrice())))
+                .andExpect(jsonPath("$.predictTime", is(request.getPredictTime())))
+                .andExpect(jsonPath("$.state", is(request.getState()))).andReturn();
+        System.err.println(result.getResponse().getContentAsString());
+    }
+
+    private Request mock() {
+        Customer customer = new Customer("420104199601021617", "13018060139", "my address", "my contactName");
+        Device device = new Device(1, "some error", 1);
+        return new Request(155, "2016-7-7", 1, customer, device);
     }
 
     @After
     public void onDestroy() {
-        requestRepository.deleteAll();
+//        requestRepository.deleteAll();
     }
 }

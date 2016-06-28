@@ -1,6 +1,9 @@
 package com.girigiri.dao.models;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.girigiri.dao.constraints.StringDateFormat;
 import lombok.Data;
 
@@ -22,8 +25,6 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    //TODO: use created instead of this
-    @JsonIgnore
     private Long time;
 
     private int predictPrice;
@@ -43,10 +44,11 @@ public class Request {
     @JsonIgnore
     private Long version;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+//    @JoinColumn(name = "CUS_ID", nullable = false)
     private Customer customer;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     private Device device;
 
     @PrePersist
@@ -121,12 +123,12 @@ public class Request {
         this.state = state;
     }
 
-
+//    @JsonBackReference(value = "customer")
     public Customer getCustomer() {
         return customer;
     }
 
-    public void setCustomer(Customer customer) {
+    public void setCustomer( Customer customer) {
         this.customer = customer;
     }
 
@@ -165,11 +167,15 @@ public class Request {
                 "id=" + id +
                 ", time=" + time +
                 ", predictPrice=" + predictPrice +
-                ", predictTime=" + predictTime +
+                ", predictTime='" + predictTime + '\'' +
                 ", state=" + state +
+                ", created=" + created +
+                ", updated=" + updated +
+                ", version=" + version +
+                ", customer=" + customer +
+                ", device=" + device +
                 '}';
     }
-
 
     @Override
     public boolean equals(Object o) {

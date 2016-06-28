@@ -36,7 +36,7 @@ public class ComponentRequest {
     private Date created;
     private Date updated;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "HIS_ID", nullable = false)
     private RepairHistory repairHistory;
 

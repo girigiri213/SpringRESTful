@@ -2,6 +2,7 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.ComponentRequest;
+import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.services.ComponentRequestRepository;
 import org.junit.*;
 import org.junit.runner.RunWith;
@@ -60,14 +61,15 @@ public class ComponentRequestRepositoryTests {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
-        componentRequest = componentRequestRepository.save(new ComponentRequest("component name", 10));
+        RepairHistory repairHistory = new RepairHistory();
+        componentRequest = componentRequestRepository.save(new ComponentRequest("component name", "serial", 10, repairHistory));
         setupId = componentRequest.getId();
     }
 
 
     @Test
     public void addComponentRequest() throws Exception {
-        ComponentRequest componentRequest = new ComponentRequest("new component name", 15);
+        ComponentRequest componentRequest = new ComponentRequest("component name", "serial", 10, new RepairHistory());
         mockMvc.perform(post("/api/componentRequests").content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isCreated());
     }
@@ -83,7 +85,7 @@ public class ComponentRequestRepositoryTests {
 
     @Test
     public void updateComponentRequest() throws Exception {
-        componentRequest = new ComponentRequest("new component", 26);
+        componentRequest = new ComponentRequest("component name", "serial", 10, new RepairHistory());
         mockMvc.perform(put("/api/componentRequests/{id}", setupId).content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isNoContent());
 
@@ -101,7 +103,7 @@ public class ComponentRequestRepositoryTests {
 
     @Test
     public void createInvalidComponentRequest() {
-        componentRequest = new ComponentRequest("bad component", -10);
+        componentRequest = new ComponentRequest("component name", "serial", -10, new RepairHistory());
         Set<ConstraintViolation<ComponentRequest>> constraintViolations =
                 validator.validate(componentRequest);
         assertEquals(1, constraintViolations.size());
@@ -120,7 +122,7 @@ public class ComponentRequestRepositoryTests {
 
     @Test
     public void addInvalidComponentRequest() throws Exception {
-        componentRequest = new ComponentRequest("bad component", -10);
+        componentRequest = new ComponentRequest("component name", "serial", -10, new RepairHistory());
         mockMvc.perform(post("/api/componentRequests").content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isBadRequest());
     }
