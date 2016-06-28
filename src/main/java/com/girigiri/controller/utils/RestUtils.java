@@ -13,7 +13,6 @@ import java.util.Set;
 public class RestUtils {
     public static ViolationError generateError(Set<ConstraintViolation<?>> set) {
         ViolationError violationError = new ViolationError();
-        violationError.setErrorSize(set.size());
         Iterator<ConstraintViolation<?>> iterator = set.iterator();
         List<ErrorMessage> errorMessages = new ArrayList<>();
         ErrorMessage errorMessage = new ErrorMessage();

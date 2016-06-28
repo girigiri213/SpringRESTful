@@ -1,13 +1,16 @@
 package com.girigiri.controller.utils;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 /**
  * Created by JianGuo on 6/28/16.
  * POJO used in json format
  */
+@JsonPropertyOrder({"entity", "message", "invalidValue", "property"})
 public class ErrorMessage {
 
-    private String property;
 
+    private String property;
     private String entity;
     private String invalidValue;
     private String message;

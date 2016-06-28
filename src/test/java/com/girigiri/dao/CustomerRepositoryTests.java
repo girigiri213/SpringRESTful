@@ -163,7 +163,7 @@ public class CustomerRepositoryTests {
                 .andExpect(jsonPath("errors[0].message", is("size must be between 11 and 11")))
                 .andExpect(jsonPath("errors[0].property", is("mobile")))
                 .andReturn();
-//        System.err.println(result.getResponse().getContentAsString());
+        System.err.println(result.getResponse().getContentAsString());
         customer.setType(0);
         customer.setEmail("test");
         mockMvc.perform(post("/api" + "/customers").content(objToJson(customer)).contentType(contentType))

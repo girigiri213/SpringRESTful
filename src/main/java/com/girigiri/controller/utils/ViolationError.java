@@ -8,21 +8,11 @@ import java.util.List;
  * Custom json for {@link ConstraintViolationException}
  */
 public class ViolationError {
-    private int errorSize;
     private List<ErrorMessage> errors;
 
     public ViolationError() {
 
     }
-
-    public int getErrorSize() {
-        return errorSize;
-    }
-
-    public void setErrorSize(int errorSize) {
-        this.errorSize = errorSize;
-    }
-
     public List<ErrorMessage> getErrors() {
         return errors;
     }
