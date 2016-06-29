@@ -128,7 +128,7 @@ public class RepairHistoryRepositoryTests {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(1);
         repairHistory.setRepairState(1);
-        MvcResult result = mockMvc.perform(post("/api/repairHistories")
+        MvcResult result = mockMvc.perform(post("/api/histories")
                 .content(objToJson(repairHistory))
                 .contentType(contentType))
                 .andExpect(status().isCreated())
@@ -141,41 +141,41 @@ public class RepairHistoryRepositoryTests {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(0);
         repairHistory.setRepairState(0);
-        mockMvc.perform(post("/api/repairHistories")
+        mockMvc.perform(post("/api/histories")
                 .content(objToJson(repairHistory))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
         repairHistory.setDelayType(5);
         repairHistory.setRepairState(4);
-        mockMvc.perform(post("/api/repairHistories")
+        mockMvc.perform(post("/api/histories")
                 .content(objToJson(repairHistory))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest());
         repairHistory.setDelayType(1);
         repairHistory.setRepairState(1);
         repairHistory.setAssignTime("1234-31-ef");
-        mockMvc.perform(post("/api/repairHistories").content(objToJson(repairHistory)).contentType(contentType))
+        mockMvc.perform(post("/api/histories").content(objToJson(repairHistory)).contentType(contentType))
                 .andExpect(status().isBadRequest());
         repairHistory.setAssignTime("2016-01-02");
         repairHistory.setRepairTime("12341esaf");
-        mockMvc.perform(post("/api/repairHistories").content(objToJson(repairHistory)).contentType(contentType))
+        mockMvc.perform(post("/api/histories").content(objToJson(repairHistory)).contentType(contentType))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void getHistory() throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/repairHistories/{id}", rep.getId()))
+        MvcResult result = mockMvc.perform(get("/api/histories/{id}", rep.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.repairState", is(rep.getRepairState())))
                 .andExpect(jsonPath("$.repairState", is(rep.getDelayType())))
-                .andExpect(jsonPath("$._links.componentRequests.href", is("http://localhost/api/repairHistories/" + rep.getId() + "/componentRequests")))
+                .andExpect(jsonPath("$._links.componentRequests.href", is("http://localhost/api/histories/" + rep.getId() + "/componentRequests")))
                 .andReturn();
 //        System.err.println(result.getResponse().getContentAsString());
     }
 
     @Test
     public void removeHistoryWillNotRemoveComponentRequest() throws Exception {
-        mockMvc.perform(delete("/api/repairHistories/{id}", rep.getId()))
+        mockMvc.perform(delete("/api/histories/{id}", rep.getId()))
                 .andExpect(status().isNoContent());
         mockMvc.perform(get("/api/componentRequests"))
                 .andExpect(status().isOk())
@@ -187,11 +187,11 @@ public class RepairHistoryRepositoryTests {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(3);
         repairHistory.setRepairState(3);
-        mockMvc.perform(put("/api/repairHistories/{id}", rep.getId())
+        mockMvc.perform(put("/api/histories/{id}", rep.getId())
                 .contentType(contentType)
                 .content(objToJson(repairHistory)))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get("/api/repairHistories/{id}", rep.getId()))
+        mockMvc.perform(get("/api/histories/{id}", rep.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.delayType", is(3)))
                 .andExpect(jsonPath("$.repairState", is(3)));
