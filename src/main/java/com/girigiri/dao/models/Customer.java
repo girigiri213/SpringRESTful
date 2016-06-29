@@ -26,41 +26,42 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Date created;
-    private Date updated;
+    private Long created;
+    private Long updated;
 
     @PrePersist
     protected void onCreate() {
-        created = updated = new Date();
+        created = updated = new Date().getTime();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated = new Date();
+        updated = new Date().getTime();
     }
 
     public Long getCreated() {
-        return created.getTime();
+        return created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated(Long created) {
         if (created == null) {
             return;
         }
         this.created = created;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(Long updated) {
         this.updated = updated;
     }
 
     public Long getUpdated() {
-        return updated.getTime();
+        return updated;
     }
 
-    @Version
-    @JsonIgnore
-    private Long version;
+//    @Version()
+//    @JsonIgnore
+    //TODO: version will change when detaches from old reference
+//    private Long version;
 
     @NotNull
     @Size(min = 18, max = 20)
@@ -245,7 +246,7 @@ public class Customer {
                 "id=" + id +
                 ", created=" + created +
                 ", updated=" + updated +
-                ", version=" + version +
+//                ", version=" + version +
                 ", userId='" + userId + '\'' +
                 ", type=" + type +
                 ", companyName='" + companyName + '\'' +
@@ -270,7 +271,7 @@ public class Customer {
         if (id != null ? !id.equals(customer.id) : customer.id != null) return false;
         if (created != null ? !created.equals(customer.created) : customer.created != null) return false;
         if (updated != null ? !updated.equals(customer.updated) : customer.updated != null) return false;
-        if (version != null ? !version.equals(customer.version) : customer.version != null) return false;
+//        if (version != null ? !version.equals(customer.version) : customer.version != null) return false;
         if (userId != null ? !userId.equals(customer.userId) : customer.userId != null) return false;
         if (companyName != null ? !companyName.equals(customer.companyName) : customer.companyName != null)
             return false;
@@ -289,7 +290,7 @@ public class Customer {
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + (created != null ? created.hashCode() : 0);
         result = 31 * result + (updated != null ? updated.hashCode() : 0);
-        result = 31 * result + (version != null ? version.hashCode() : 0);
+//        result = 31 * result + (version != null ? version.hashCode() : 0);
         result = 31 * result + (userId != null ? userId.hashCode() : 0);
         result = 31 * result + type;
         result = 31 * result + (companyName != null ? companyName.hashCode() : 0);

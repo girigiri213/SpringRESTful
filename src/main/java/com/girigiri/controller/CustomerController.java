@@ -49,7 +49,7 @@ public class CustomerController {
     @ResponseBody
     ResponseEntity<?> getCustomers() {
         Resources<Customer> resources = new Resources<>(customerRepository.findAll());
-        resources.add(linkTo(methodOn(RequestController.class).getRequests()).withSelfRel());
+        resources.add(linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
         return ResponseEntity.ok(resources);
     }
 

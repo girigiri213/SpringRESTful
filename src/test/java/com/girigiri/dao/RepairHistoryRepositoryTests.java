@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringApplicationConfiguration(classes = SpringMvcApplication.class)
 @WebAppConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//TODO: pass this test
 public class RepairHistoryRepositoryTests {
 
     private MockMvc mockMvc;

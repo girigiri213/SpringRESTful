@@ -4,18 +4,17 @@ package com.girigiri.dao;
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.Customer;
 import com.girigiri.dao.models.Device;
+import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.models.Request;
 import com.girigiri.dao.services.CustomerRepository;
 import com.girigiri.dao.services.RequestRepository;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.http.MediaType;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,11 +25,10 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Set;
 
 import static com.girigiri.utils.TestUtil.contentType;
+import static com.girigiri.utils.TestUtil.getResourceIdFromUrl;
 import static com.girigiri.utils.TestUtil.objToJson;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.is;
@@ -48,7 +46,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SpringMvcApplication.class)
 @WebAppConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RequestRepositoryTests {
 
     private MockMvc mockMvc;
@@ -63,8 +60,9 @@ public class RequestRepositoryTests {
 
 
     private static Validator validator;
-    private long setupId;
+    private Customer customer;
 
+    private Request request;
 
     @BeforeClass
     public static void onCreate() {
@@ -73,42 +71,52 @@ public class RequestRepositoryTests {
     }
 
 
-
-
-
     @Before
     public void setup() {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
-        Request request = requestRepository.save(mock());
-        setupId = request.getId();
+        Device device = new Device(1, "some error", 1);
+        Customer cus = new Customer("420302133404031213", "13020202134", "new address", "my contactName");
+        Request tmp = new Request(155, "2016-7-7", 1);
+        RepairHistory repairHistory = new RepairHistory();
+        tmp.setCustomer(cus);
+        tmp.setDevice(device);
+        tmp.setRepairHistory(repairHistory);
+        customer = customerRepository.save(cus);
+        request = requestRepository.save(tmp);
     }
 
     @Test
     public void getRequest() throws Exception {
-        mockMvc.perform(get("/api/requests/{id}", setupId))
+        mockMvc.perform(get("/api/requests/{id}", request.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.predictTime", is("2016-7-7")))
                 .andExpect(jsonPath("$.predictPrice", is(155)))
                 .andExpect(jsonPath("$").value(hasKey("created")))
                 .andExpect(jsonPath("$.state", is(1)));
+
     }
 
     @Test
     public void addRequest() throws Exception {
-        Request request = mock();
-        String json = objToJson(request);
+        Device device = new Device(1, "some error", 1);
+        Request tmp = new Request(155, "2016-7-7", 1);
+        tmp.setDevice(device);
+        tmp.setCustomer(customer);
+        String json = objToJson(tmp);
         System.err.println("request json: " + json);
         MvcResult result = mockMvc.perform(post("/api/requests").content(json)
                 .contentType(contentType))
                 .andExpect(status().isCreated()).andReturn();
-        System.err.println("response: " + result.getResponse().getContentAsString());
+        long id = getResourceIdFromUrl(result.getResponse().getRedirectedUrl());
+        result = mockMvc.perform(get("/api/requests/{id}", id))
+                .andExpect(status().isOk()).andReturn();
+        System.out.println(result.getResponse().getContentAsString());
     }
 
     @Test
     public void createRequestOutOfBoundary() {
-        Request request = mock();
         request.setState(4);
         Set<ConstraintViolation<Request>> constraintViolations =
                 validator.validate(request);
@@ -127,7 +135,6 @@ public class RequestRepositoryTests {
 
     @Test
     public void addRequestOutOfBoundary() throws Exception {
-        Request request = mock();
         request.setState(4);
         mockMvc.perform(post("/api/requests").content(objToJson(request)).contentType(contentType))
                 .andExpect(status().isBadRequest());
@@ -142,30 +149,37 @@ public class RequestRepositoryTests {
 
     @Test
     public void updateRequest() throws Exception {
-        Request request = mock();
-        mockMvc.perform(put("/api" + "/requests/{id}", setupId)
+        request.setState(3);
+        mockMvc.perform(put("/api" + "/requests/{id}", request.getId())
                 .content(objToJson(request))
                 .contentType(contentType))
-                .andExpect(status().isNoContent())
-                .andReturn();
-        request.getCustomer().setType(2);
-        request.getDevice().setType(3);
-        MvcResult result = mockMvc.perform(get("/api" + "/requests/{id}", setupId))
+                .andExpect(status().isNoContent());
+        MvcResult result = mockMvc.perform(get("/api/requests/{id}", request.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.predictPrice", is(request.getPredictPrice())))
-                .andExpect(jsonPath("$.predictTime", is(request.getPredictTime())))
-                .andExpect(jsonPath("$.state", is(request.getState()))).andReturn();
-        System.err.println(result.getResponse().getContentAsString());
+                .andExpect(jsonPath("state", is(request.getState())))
+                .andReturn();
     }
 
-    private Request mock() {
-        Customer customer = new Customer("420104199601021617", "13018060139", "my address", "my contactName");
-        Device device = new Device(1, "some error", 1);
-        return new Request(155, "2016-7-7", 1, customer, device);
+    @Test
+    public void deleteRequestWillDeleteRepairHistoryAndDeviceButNotDeleteCustomer() throws Exception {
+        mockMvc.perform(delete("/api/requests/{id}", request.getId()))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/customers/{id}", request.getCustomer().getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId", is(request.getCustomer().getUserId())))
+                .andExpect(jsonPath("$.mobile", is(request.getCustomer().getMobile())))
+                .andExpect(jsonPath("$.address", is(request.getCustomer().getAddress())))
+                .andExpect(jsonPath("$.contactName", is(request.getCustomer().getContactName())));
+        mockMvc.perform(get("/api/devices/{id}", request.getDevice().getId()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/repairHistories/{id}", request.getRepairHistory().getId()))
+                .andExpect(status().isNotFound());
     }
+
 
     @After
     public void onDestroy() {
-//        requestRepository.deleteAll();
+        requestRepository.deleteAll();
+        customerRepository.deleteAll();
     }
 }

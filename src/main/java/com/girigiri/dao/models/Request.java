@@ -34,14 +34,14 @@ public class Request {
     @NotNull
     private int state;
 
-    private Date created;
-    private Date updated;
+    private Long created;
+    private Long updated;
 
     @Version
     @JsonIgnore
     private Long version;
 
-    @ManyToOne(cascade={CascadeType.MERGE}, fetch=FetchType.EAGER)
+    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
     //TODO:if this request is deleted, customer will not be deleted
     @JoinColumn(name = "CUS_ID")
     private Customer customer;
@@ -51,7 +51,7 @@ public class Request {
         return customer;
     }
 
-    @ManyToOne(cascade={CascadeType.MERGE}, fetch=FetchType.EAGER)
+    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
     public void setCustomer(Customer newCustomer) {
         if (sameAsFormer(newCustomer)) return;
         this.customer = newCustomer;
@@ -85,15 +85,27 @@ public class Request {
                 newDevice == null : device.equals(newDevice);
     }
 
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private RepairHistory repairHistory;
+
+    public RepairHistory getRepairHistory() {
+        return repairHistory;
+    }
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    public void setRepairHistory(RepairHistory repairHistory) {
+        if (this.repairHistory == null ? repairHistory == null: this.repairHistory.equals(repairHistory)) return;
+        this.repairHistory = repairHistory;
+    }
+
 
     @PrePersist
     protected void onCreate() {
-        created = updated = new Date();
+        created = updated = new Date().getTime();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated = new Date();
+        updated = new Date().getTime();
     }
 
     public Request() {
@@ -170,22 +182,22 @@ public class Request {
 
 
     public Long getCreated() {
-        return created.getTime();
+        return created;
     }
 
-    public void setCreated(Date created) {
+    public void setCreated(Long created) {
         if (created == null) {
             return;
         }
         this.created = created;
     }
 
-    public void setUpdated(Date updated) {
+    public void setUpdated(Long updated) {
         this.updated = updated;
     }
 
     public Long getUpdated() {
-        return updated.getTime();
+        return updated;
     }
 
 

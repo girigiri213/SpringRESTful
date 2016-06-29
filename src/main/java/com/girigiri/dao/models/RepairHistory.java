@@ -55,12 +55,9 @@ public class RepairHistory {
     @Min(1)
     private int delayType;
 
-    @NotNull
-    @OneToOne(cascade = {CascadeType.ALL})
-    private Request request;
 
     @OneToMany(mappedBy = "repairHistory", cascade = CascadeType.ALL)
-    private Set<ComponentRequest> componentRequests;
+    private List<ComponentRequest> componentRequests;
 
     @Version
     @JsonIgnore
@@ -81,26 +78,16 @@ public class RepairHistory {
 
 
     public RepairHistory() {
-
+        this(1, 1);
     }
 
-    public RepairHistory(int repairState, int delayType, Request request) {
+    public RepairHistory(int repairState, int delayType) {
         this.repairState = repairState;
         this.delayType = delayType;
-        this.request = request;
     }
 
 
-    public RepairHistory(int repairState, int delayType, Request request, Set<ComponentRequest> componentRequests) {
-        this.repairState = repairState;
-        this.delayType = delayType;
-        this.request = request;
-        this.componentRequests = componentRequests;
-    }
 
-    public RepairHistory(Request request) {
-        this(1, 1, request, null);
-    }
 
 
     public Long getId() {
@@ -204,19 +191,12 @@ public class RepairHistory {
     }
 
 
-    public Request getRequest() {
-        return request;
-    }
 
-    public void setRequest(Request request) {
-        this.request = request;
-    }
-
-    public Set<ComponentRequest> getComponentRequests() {
+    public List<ComponentRequest> getComponentRequests() {
         return componentRequests;
     }
 
-    public void setComponentRequests(Set<ComponentRequest> componentRequests) {
+    public void setComponentRequests(List<ComponentRequest> componentRequests) {
         this.componentRequests = componentRequests;
     }
 
