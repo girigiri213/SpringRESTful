@@ -62,14 +62,14 @@ public class ComponentRequestRepositoryTests {
                 .apply(springSecurity())
                 .build();
         RepairHistory repairHistory = new RepairHistory();
-        componentRequest = componentRequestRepository.save(new ComponentRequest("component name", "serial", 10, repairHistory));
+        componentRequest = componentRequestRepository.save(new ComponentRequest("component name", "serial", 10));
         setupId = componentRequest.getId();
     }
 
 
     @Test
     public void addComponentRequest() throws Exception {
-        ComponentRequest componentRequest = new ComponentRequest("component name", "serial", 10, new RepairHistory());
+        ComponentRequest componentRequest = new ComponentRequest("component name", "serial", 10);
         mockMvc.perform(post("/api/componentRequests").content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isCreated());
     }
@@ -85,7 +85,7 @@ public class ComponentRequestRepositoryTests {
 
     @Test
     public void updateComponentRequest() throws Exception {
-        componentRequest = new ComponentRequest("component name", "serial", 10, new RepairHistory());
+        componentRequest = new ComponentRequest("component name", "serial", 10);
         mockMvc.perform(put("/api/componentRequests/{id}", setupId).content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isNoContent());
 
@@ -103,7 +103,7 @@ public class ComponentRequestRepositoryTests {
 
     @Test
     public void createInvalidComponentRequest() {
-        componentRequest = new ComponentRequest("component name", "serial", -10, new RepairHistory());
+        componentRequest = new ComponentRequest("component name", "serial", -10);
         Set<ConstraintViolation<ComponentRequest>> constraintViolations =
                 validator.validate(componentRequest);
         assertEquals(1, constraintViolations.size());
@@ -122,7 +122,7 @@ public class ComponentRequestRepositoryTests {
 
     @Test
     public void addInvalidComponentRequest() throws Exception {
-        componentRequest = new ComponentRequest("component name", "serial", -10, new RepairHistory());
+        componentRequest = new ComponentRequest("component name", "serial", -10);
         mockMvc.perform(post("/api/componentRequests").content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isBadRequest());
     }

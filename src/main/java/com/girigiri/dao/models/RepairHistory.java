@@ -56,7 +56,7 @@ public class RepairHistory {
     private int delayType;
 
 
-    @OneToMany(mappedBy = "repairHistory", cascade = CascadeType.ALL)
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<ComponentRequest> componentRequests;
 
     @Version

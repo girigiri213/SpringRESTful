@@ -1,8 +1,11 @@
 package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
+import com.girigiri.dao.models.ComponentRequest;
 import com.girigiri.dao.models.RepairHistory;
+import com.girigiri.dao.services.ComponentRequestRepository;
 import com.girigiri.dao.services.RepairHistoryRepository;
+import com.sun.corba.se.spi.logging.CORBALogDomains;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -18,9 +21,12 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static com.girigiri.utils.TestUtil.*;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -37,7 +43,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringApplicationConfiguration(classes = SpringMvcApplication.class)
 @WebAppConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-//TODO: pass this test
+//TODO: pass this test with ComponentRequest passed into
 public class RepairHistoryRepositoryTests {
 
     private MockMvc mockMvc;
@@ -47,9 +53,13 @@ public class RepairHistoryRepositoryTests {
     @Autowired
     private RepairHistoryRepository repairHistoryRepository;
 
-    private static Validator validator;
-    private long setupId;
 
+    @Autowired
+    private ComponentRequestRepository componentRequestRepository;
+
+    private static Validator validator;
+
+    private RepairHistory rep;
 
     @BeforeClass
     public static void onCreate() {
@@ -65,8 +75,13 @@ public class RepairHistoryRepositoryTests {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(2);
         repairHistory.setRepairState(2);
-        RepairHistory rep = repairHistoryRepository.save(repairHistory);
-        setupId = rep.getId();
+        ComponentRequest request = new ComponentRequest("name", "serial number", 10);
+        List<ComponentRequest> componentRequestList = new ArrayList<>();
+        componentRequestList.add(request);
+        request = new ComponentRequest("new name", "new serial number", 20);
+        componentRequestList.add(request);
+        repairHistory.setComponentRequests(componentRequestList);
+        rep = repairHistoryRepository.save(repairHistory);
     }
 
 
@@ -118,7 +133,6 @@ public class RepairHistoryRepositoryTests {
                 .contentType(contentType))
                 .andExpect(status().isCreated())
                 .andReturn();
-        setupId = getResourceIdFromUrl(result.getResponse().getRedirectedUrl());
     }
 
 
@@ -150,14 +164,22 @@ public class RepairHistoryRepositoryTests {
 
     @Test
     public void getHistory() throws Exception {
-        mockMvc.perform(get("/api/repairHistories/{id}", setupId))
-                .andExpect(status().isOk());
+        MvcResult result = mockMvc.perform(get("/api/repairHistories/{id}", rep.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.repairState", is(rep.getRepairState())))
+                .andExpect(jsonPath("$.repairState", is(rep.getDelayType())))
+                .andExpect(jsonPath("$._links.componentRequests.href", is("http://localhost/api/repairHistories/" + rep.getId() + "/componentRequests")))
+                .andReturn();
+//        System.err.println(result.getResponse().getContentAsString());
     }
 
     @Test
-    public void removeHistory() throws Exception {
-        mockMvc.perform(delete("/api/repairHistories/{id}", setupId))
+    public void removeHistoryWillNotRemoveComponentRequest() throws Exception {
+        mockMvc.perform(delete("/api/repairHistories/{id}", rep.getId()))
                 .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/componentRequests"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.componentRequests", hasSize(rep.getComponentRequests().size())));
     }
 
     @Test
@@ -165,20 +187,21 @@ public class RepairHistoryRepositoryTests {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(3);
         repairHistory.setRepairState(3);
-        mockMvc.perform(put("/api/repairHistories/{id}", setupId)
+        mockMvc.perform(put("/api/repairHistories/{id}", rep.getId())
                 .contentType(contentType)
                 .content(objToJson(repairHistory)))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get("/api/repairHistories/{id}", setupId))
+        mockMvc.perform(get("/api/repairHistories/{id}", rep.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.delayType", is(3)))
                 .andExpect(jsonPath("$.repairState", is(3)));
-
     }
+
 
     @After
     public void onDestroy() {
         repairHistoryRepository.deleteAll();
+        componentRequestRepository.deleteAll();
     }
 
 }

@@ -15,7 +15,7 @@ import java.util.Set;
  * database loader for init.
  */
 //Comment this if you don't want any initial data.
-@Component
+//@Component
 public class DatabaseLoader implements CommandLineRunner {
 
     @Autowired
