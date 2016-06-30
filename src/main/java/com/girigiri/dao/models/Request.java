@@ -2,12 +2,13 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.girigiri.dao.constraints.StringDateFormat;
+import com.girigiri.dao.validators.CustomerIdValidator;
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -17,11 +18,13 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "request")
+@Validated(value = {CustomerIdValidator.class})
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @JsonIgnore
     private Long time;
 
     private int predictPrice;
@@ -31,39 +34,74 @@ public class Request {
 
     @Min(1)
     @Max(3)
-    @NotNull
     private int state;
 
-    private Long created;
-    private Long updated;
+    private Date created;
+
+    private Date updated;
+
+
+
+    public Long getCreated() {
+        return created.getTime();
+    }
+
+    public void setCreated(Date created) {
+        if (created == null) {
+            return;
+        }
+        this.created = created;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public Long getUpdated() {
+        return updated.getTime();
+    }
+
+
+
 
     @Version
     @JsonIgnore
     private Long version;
 
-    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
-    //TODO:if this request is deleted, customer will not be deleted
-    @JoinColumn(name = "CUS_ID")
-    private Customer customer;
+//    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
+//    //TODO:if this request is deleted, customer will not be deleted
+//    @JoinColumn(name = "CUS_ID")
+//    private Customer customer;
+//
+//
+//    public Customer getCustomer() {
+//        return customer;
+//    }
+//
+//    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
+//    public void setCustomer(Customer newCustomer) {
+//        if (sameAsFormer(newCustomer)) return;
+//        this.customer = newCustomer;
+//    }
+//
+//
+//    private boolean sameAsFormer(Customer customer) {
+//        return this.customer == null ?
+//               customer == null : this.customer.equals(customer);
+//
+//    }
 
 
-    public Customer getCustomer() {
-        return customer;
+
+    private long cusId;
+
+    public long getCusId() {
+        return cusId;
     }
 
-    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
-    public void setCustomer(Customer newCustomer) {
-        if (sameAsFormer(newCustomer)) return;
-        this.customer = newCustomer;
+    public void setCusId(long cusId) {
+        this.cusId = cusId;
     }
-
-
-    private boolean sameAsFormer(Customer customer) {
-        return this.customer == null ?
-               customer == null : this.customer.equals(customer);
-
-    }
-
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     //TODO:if this request is deleted, device will be deleted too
@@ -100,21 +138,19 @@ public class Request {
 
     @PrePersist
     protected void onCreate() {
-        created = updated = new Date().getTime();
+
+        created = updated = new Date();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated = new Date().getTime();
+        updated = new Date();
     }
 
     public Request() {
 
     }
 
-    public Request(int predictPrice, String predictTime, int state, Customer customer, Device device) {
-        this(new Date().getTime(), predictPrice, predictTime, state, customer, device);
-    }
 
     public Request(int predictPrice, String predictTime, int state) {
         this.predictPrice =predictPrice;
@@ -123,13 +159,11 @@ public class Request {
         this.time = new Date().getTime();
     }
 
-    public Request(Long time, int predictPrice, String predictTime, int state, Customer customer, Device device) {
+    public Request(Long time, int predictPrice, String predictTime, int state) {
         this.time = time;
         this.predictPrice = predictPrice;
         this.predictTime = predictTime;
         this.state = state;
-        this.customer = customer;
-        this.device = device;
     }
 
 
@@ -179,28 +213,6 @@ public class Request {
 
 
 
-
-
-    public Long getCreated() {
-        return created;
-    }
-
-    public void setCreated(Long created) {
-        if (created == null) {
-            return;
-        }
-        this.created = created;
-    }
-
-    public void setUpdated(Long updated) {
-        this.updated = updated;
-    }
-
-    public Long getUpdated() {
-        return updated;
-    }
-
-
     @Override
     public String toString() {
         return "Request{" +
@@ -212,7 +224,7 @@ public class Request {
                 ", created=" + created +
                 ", updated=" + updated +
                 ", version=" + version +
-                ", customer=" + customer +
+                ", customerId=" + cusId +
                 ", device=" + device +
                 '}';
     }

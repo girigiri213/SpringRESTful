@@ -128,7 +128,7 @@ public class CustomerController {
     @ResponseBody
     ResponseEntity<?> delete(@PathVariable Long id) {
         validateCustomer(id);
-        requestRepository.removeByCustomer(customerRepository.findOne(id));
+        requestRepository.removeByCusId(id);
         customerRepository.delete(id);
         return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     }

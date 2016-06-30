@@ -78,8 +78,9 @@ public class DeviceRepositoryTests {
         Device device = new Device(1, "some error", 1);
         Request request = new Request(155, "2016-7-7", 1);
         request.setDevice(device);
-        request.setCustomer(customer);
-        customerRepository.save(customer);
+
+        Customer customer1 = customerRepository.save(customer);
+        request.setCusId(customer1.getId());
         rst = requestRepository.save(request);
         setupId = request.getDevice().getId();
     }

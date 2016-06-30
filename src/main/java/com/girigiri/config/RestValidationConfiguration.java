@@ -1,5 +1,6 @@
 package com.girigiri.config;
 
+import com.girigiri.dao.validators.CustomerIdValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -30,6 +31,8 @@ public class RestValidationConfiguration extends RepositoryRestConfigurerAdapter
         Validator validator = validator();
         // bean validation always before save and create
         validatingListener.addValidator("beforeCreate", validator);
+        validatingListener.addValidator("beforeCreate", new CustomerIdValidator());
         validatingListener.addValidator("beforeSave", validator);
+        validatingListener.addValidator("beforeSave", new CustomerIdValidator());
     }
 }

@@ -39,9 +39,9 @@ public class DatabaseLoader implements CommandLineRunner {
         Device device = new Device(1, "some error", 1);
         Request request = new Request(155, "2016-7-7", 1);
         request.setDevice(device);
-        request.setCustomer(customer);
-        customerRepository.save(customer);
 
+        Customer rst = customerRepository.save(customer);
+        request.setCusId(rst.getId());
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(1);
         repairHistory.setRepairState(1);

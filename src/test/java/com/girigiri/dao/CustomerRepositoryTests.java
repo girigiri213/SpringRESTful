@@ -5,11 +5,12 @@ import com.girigiri.dao.models.Customer;
 import com.girigiri.dao.models.Device;
 import com.girigiri.dao.models.Request;
 import com.girigiri.dao.services.CustomerRepository;
-import com.girigiri.dao.services.DeviceRepository;
 import com.girigiri.dao.services.RequestRepository;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -76,26 +77,21 @@ public class CustomerRepositoryTests {
         Device device = new Device(1, "some error", 1);
         Request tmp = new Request(155, "2016-7-7", 1);
         tmp.setDevice(device);
-        tmp.setCustomer(customer);
+
         rst = customerRepository.save(customer);
+        tmp.setCusId(rst.getId());
         request = requestRepository.save(tmp);
     }
 
 
     @Test
-    public void updateCustomerAndUpdatedInRequest() throws Exception {
+    public void updateCustomer() throws Exception {
         Customer customer = new Customer("420123********1617", "1304****139", "my new address", "my new contactName");
         mockMvc.perform(put("/api" + "/customers/{id}", rst.getId())
                 .content(objToJson(customer))
                 .contentType(contentType))
                 .andExpect(status().isNoContent())
                 .andReturn();
-        mockMvc.perform(get("/api" + "/requests/{id}/customer", request.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", is("420123********1617")))
-                .andExpect(jsonPath("$.mobile", is("1304****139")))
-                .andExpect(jsonPath("$.address", is("my new address")))
-            .andExpect(jsonPath("$.contactName", is("my new contactName")));
     }
 
     @Test

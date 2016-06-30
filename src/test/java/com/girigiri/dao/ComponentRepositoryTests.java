@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SpringMvcApplication.class)
 @WebAppConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ComponentRepositoryTests {
     private MockMvc mockMvc;
     private static Validator validator;

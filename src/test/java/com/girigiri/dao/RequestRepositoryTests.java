@@ -80,10 +80,10 @@ public class RequestRepositoryTests {
         Customer cus = new Customer("420302133404031213", "13020202134", "new address", "my contactName");
         Request tmp = new Request(155, "2016-7-7", 1);
         RepairHistory repairHistory = new RepairHistory();
-        tmp.setCustomer(cus);
         tmp.setDevice(device);
         tmp.setRepairHistory(repairHistory);
         customer = customerRepository.save(cus);
+        tmp.setCusId(customer.getId());
         request = requestRepository.save(tmp);
     }
 
@@ -103,7 +103,7 @@ public class RequestRepositoryTests {
         Device device = new Device(1, "some error", 1);
         Request tmp = new Request(155, "2016-7-7", 1);
         tmp.setDevice(device);
-        tmp.setCustomer(customer);
+        tmp.setCusId(customer.getId());
         String json = objToJson(tmp);
         System.err.println("request json: " + json);
         MvcResult result = mockMvc.perform(post("/api/requests").content(json)
@@ -113,6 +113,16 @@ public class RequestRepositoryTests {
         result = mockMvc.perform(get("/api/requests/{id}", id))
                 .andExpect(status().isOk()).andReturn();
         System.out.println(result.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void addRequestWithInvalidCustomerWillFail() throws Exception {
+        Request request = new Request(200, "2041-7-3", 2);
+        request.setCusId(0);
+        request.setDevice(new Device(1, "some error", 1));
+        MvcResult result = mockMvc.perform(post("/api/requests").content(objToJson(request))
+                .contentType(contentType))
+                .andExpect(status().isBadRequest()).andReturn();
     }
 
     @Test
@@ -149,32 +159,35 @@ public class RequestRepositoryTests {
 
     @Test
     public void updateRequest() throws Exception {
+        Request request = new Request();
         request.setState(3);
-        mockMvc.perform(put("/api" + "/requests/{id}", request.getId())
+        String json = objToJson(request);
+        System.err.println("put json" + json);
+        mockMvc.perform(put("/api/requests/{id}", this.request.getId())
                 .content(objToJson(request))
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
-        MvcResult result = mockMvc.perform(get("/api/requests/{id}", request.getId()))
+        MvcResult result = mockMvc.perform(get("/api/requests/{id}", this.request.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("state", is(request.getState())))
                 .andReturn();
+        System.err.println("response json " + result.getResponse().getContentAsString());
     }
 
     @Test
     public void deleteRequestWillDeleteRepairHistoryAndDeviceButNotDeleteCustomer() throws Exception {
         mockMvc.perform(delete("/api/requests/{id}", request.getId()))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get("/api/customers/{id}", request.getCustomer().getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.userId", is(request.getCustomer().getUserId())))
-                .andExpect(jsonPath("$.mobile", is(request.getCustomer().getMobile())))
-                .andExpect(jsonPath("$.address", is(request.getCustomer().getAddress())))
-                .andExpect(jsonPath("$.contactName", is(request.getCustomer().getContactName())));
+        mockMvc.perform(get("/api/customers/{id}", request.getCusId()))
+                .andExpect(status().isOk());
         mockMvc.perform(get("/api/devices/{id}", request.getDevice().getId()))
                 .andExpect(status().isNotFound());
         mockMvc.perform(get("/api/repairHistories/{id}", request.getRepairHistory().getId()))
                 .andExpect(status().isNotFound());
     }
+
+
+
 
 
     @After
