@@ -58,10 +58,6 @@ public class Customer {
         return updated;
     }
 
-//    @Version()
-//    @JsonIgnore
-    //TODO: version will change when detaches from old reference
-//    private Long version;
 
     @NotNull
     @Size(min = 18, max = 20)
@@ -92,34 +88,6 @@ public class Customer {
     @Email
     @Nullable
     private String email;
-
-//    //// FIXME: 6/28/16 Error when delete a customer
-//    @OneToMany(mappedBy = "customer")
-//    private List<Request> requests = new ArrayList<>();
-//
-//    public void setRequests(List<Request> requests) {
-//        this.requests = requests;
-//    }
-//
-//    public List<Request> getRequests() {
-//        return Collections.unmodifiableList(requests);
-//    }
-//
-//
-//    public void addRequest(Request request) {
-//        if (requests.contains(request)) return;
-//        if (request.getCustomer() != null) {
-//            request.getCustomer().removeRequest(request);
-//        }
-//        requests.add(request);
-//        request.setCustomer(this);
-//    }
-//
-//    public void removeRequest(Request request) {
-//        if (!requests.contains(request)) return;
-//        requests.remove(request);
-//        request.setCustomer(null);
-//    }
 
 
 

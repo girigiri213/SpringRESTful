@@ -38,6 +38,7 @@ public class Component {
     private int warningSize;
 
     @JsonIgnore
+    //// FIXME: 6/30/16 Don't ignore it!
     private int state;
 
     private Date created;

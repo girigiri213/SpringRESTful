@@ -2,9 +2,7 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.girigiri.dao.constraints.StringDateFormat;
-import com.girigiri.dao.validators.CustomerIdValidator;
 import lombok.Data;
-import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
@@ -18,7 +16,6 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "request")
-@Validated(value = {CustomerIdValidator.class})
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -68,43 +65,19 @@ public class Request {
     @JsonIgnore
     private Long version;
 
-//    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
-//    //TODO:if this request is deleted, customer will not be deleted
-//    @JoinColumn(name = "CUS_ID")
-//    private Customer customer;
-//
-//
-//    public Customer getCustomer() {
-//        return customer;
-//    }
-//
-//    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
-//    public void setCustomer(Customer newCustomer) {
-//        if (sameAsFormer(newCustomer)) return;
-//        this.customer = newCustomer;
-//    }
-//
-//
-//    private boolean sameAsFormer(Customer customer) {
-//        return this.customer == null ?
-//               customer == null : this.customer.equals(customer);
-//
-//    }
 
 
+    private Long cusId;
 
-    private long cusId;
-
-    public long getCusId() {
+    public Long getCusId() {
         return cusId;
     }
 
-    public void setCusId(long cusId) {
+    public void setCusId(Long cusId) {
         this.cusId = cusId;
     }
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    //TODO:if this request is deleted, device will be deleted too
     private Device device;
 
 
@@ -224,7 +197,7 @@ public class Request {
                 ", created=" + created +
                 ", updated=" + updated +
                 ", version=" + version +
-                ", customerId=" + cusId +
+                ", cusId=" + cusId +
                 ", device=" + device +
                 '}';
     }
