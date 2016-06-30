@@ -13,6 +13,7 @@ public class SpringMvcApplicationTests {
 
 	@Test
 	public void contextLoads() {
+
 	}
 
 }

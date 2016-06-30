@@ -1,11 +1,17 @@
 package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
+import com.girigiri.dao.models.Customer;
 import com.girigiri.dao.models.Device;
+import com.girigiri.dao.models.Request;
+import com.girigiri.dao.services.CustomerRepository;
 import com.girigiri.dao.services.DeviceRepository;
-import org.junit.*;
+import com.girigiri.dao.services.RequestRepository;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -36,7 +42,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = SpringMvcApplication.class)
 @WebAppConfiguration
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DeviceRepositoryTests {
 
     private MockMvc mockMvc;
@@ -47,7 +52,15 @@ public class DeviceRepositoryTests {
     @Autowired
     private DeviceRepository deviceRepository;
 
+    @Autowired
+    private RequestRepository requestRepository;
+
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
     private long setupId;
+    private Request rst;
 
     @BeforeClass
     public static void onCreate() {
@@ -60,8 +73,16 @@ public class DeviceRepositoryTests {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
-        Device device = deviceRepository.save(new Device(1, "some error", 1));
-        setupId = device.getId();
+
+        Customer customer = new Customer("420104199601021617", "13018060139", "my address", "my contactName");
+        Device device = new Device(1, "some error", 1);
+        Request request = new Request(155, "2016-7-7", 1);
+        request.setDevice(device);
+
+        Customer customer1 = customerRepository.save(customer);
+        request.setCusId(customer1.getId());
+        rst = requestRepository.save(request);
+        setupId = request.getDevice().getId();
     }
 
     @Test
@@ -80,9 +101,9 @@ public class DeviceRepositoryTests {
     }
 
     @Test
-    public void deleteDevice() throws Exception {
+    public void deleteDeviceIsNotAllowed() throws Exception {
         mockMvc.perform(delete("/api/devices/{id}", setupId))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test
@@ -143,8 +164,12 @@ public class DeviceRepositoryTests {
     }
 
 
+
+
     @After
     public void onDestroy() {
+        requestRepository.deleteAll();
+        customerRepository.deleteAll();
         deviceRepository.deleteAll();
     }
 }

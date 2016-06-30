@@ -2,12 +2,13 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.girigiri.dao.constraints.StringDateFormat;
+import com.girigiri.dao.validators.CustomerIdValidator;
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 /**
@@ -17,12 +18,12 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "request")
+@Validated(value = {CustomerIdValidator.class})
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    //TODO: use created instead of this
     @JsonIgnore
     private Long time;
 
@@ -33,25 +34,13 @@ public class Request {
 
     @Min(1)
     @Max(3)
-    @NotNull
     private int state;
 
     private Date created;
+
     private Date updated;
 
-    @Version
-    @JsonIgnore
-    private Long version;
 
-    @PrePersist
-    protected void onCreate() {
-        created = updated = new Date();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updated = new Date();
-    }
 
     public Long getCreated() {
         return created.getTime();
@@ -72,12 +61,102 @@ public class Request {
         return updated.getTime();
     }
 
-    public Request() {
-        this(1);
+
+
+
+    @Version
+    @JsonIgnore
+    private Long version;
+
+//    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
+//    //TODO:if this request is deleted, customer will not be deleted
+//    @JoinColumn(name = "CUS_ID")
+//    private Customer customer;
+//
+//
+//    public Customer getCustomer() {
+//        return customer;
+//    }
+//
+//    @ManyToOne(cascade={CascadeType.MERGE, CascadeType.REFRESH}, fetch=FetchType.EAGER)
+//    public void setCustomer(Customer newCustomer) {
+//        if (sameAsFormer(newCustomer)) return;
+//        this.customer = newCustomer;
+//    }
+//
+//
+//    private boolean sameAsFormer(Customer customer) {
+//        return this.customer == null ?
+//               customer == null : this.customer.equals(customer);
+//
+//    }
+
+
+
+    private long cusId;
+
+    public long getCusId() {
+        return cusId;
     }
 
-    public Request(int state) {
+    public void setCusId(long cusId) {
+        this.cusId = cusId;
+    }
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    //TODO:if this request is deleted, device will be deleted too
+    private Device device;
+
+
+    public Device getDevice() {
+        return device;
+    }
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    public void setDevice(Device newDevice) {
+        if (sameAsFormer(newDevice)) return;
+        this.device = newDevice;
+    }
+
+    private boolean sameAsFormer(Device newDevice) {
+        return device == null ?
+                newDevice == null : device.equals(newDevice);
+    }
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private RepairHistory repairHistory;
+
+    public RepairHistory getRepairHistory() {
+        return repairHistory;
+    }
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    public void setRepairHistory(RepairHistory repairHistory) {
+        if (this.repairHistory == null ? repairHistory == null: this.repairHistory.equals(repairHistory)) return;
+        this.repairHistory = repairHistory;
+    }
+
+
+    @PrePersist
+    protected void onCreate() {
+
+        created = updated = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updated = new Date();
+    }
+
+    public Request() {
+
+    }
+
+
+    public Request(int predictPrice, String predictTime, int state) {
+        this.predictPrice =predictPrice;
+        this.predictTime = predictTime;
         this.state = state;
+        this.time = new Date().getTime();
     }
 
     public Request(Long time, int predictPrice, String predictTime, int state) {
@@ -85,10 +164,6 @@ public class Request {
         this.predictPrice = predictPrice;
         this.predictTime = predictTime;
         this.state = state;
-    }
-
-    public Request(int predictPrice, String predictTime, int state) {
-        this(new Date().getTime(), predictPrice, predictTime, state);
     }
 
 
@@ -136,17 +211,23 @@ public class Request {
         this.state = state;
     }
 
+
+
     @Override
     public String toString() {
         return "Request{" +
                 "id=" + id +
                 ", time=" + time +
                 ", predictPrice=" + predictPrice +
-                ", predictTime=" + predictTime +
+                ", predictTime='" + predictTime + '\'' +
                 ", state=" + state +
+                ", created=" + created +
+                ", updated=" + updated +
+                ", version=" + version +
+                ", customerId=" + cusId +
+                ", device=" + device +
                 '}';
     }
-
 
     @Override
     public boolean equals(Object o) {

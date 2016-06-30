@@ -22,8 +22,11 @@ public class DateValidator implements ConstraintValidator<StringDateFormat, Stri
         if (value == null) {
             return true;
         }
+        if (containsLetter(value)) {
+            return false;
+        }
+        DateFormat dateFormat = new SimpleDateFormat(value);
         try {
-            DateFormat dateFormat = new SimpleDateFormat(value);
             dateFormat.setLenient(false);
             dateFormat.parse(value);
             return true;
@@ -31,5 +34,13 @@ public class DateValidator implements ConstraintValidator<StringDateFormat, Stri
             e.printStackTrace();
             return false;
         }
+    }
+
+    private boolean containsLetter(String value) {
+        for (int i = 0; i < value.length(); i++) {
+            if ((value.charAt(i) <= 'z' && value.charAt(i) >= 'a') || (value.charAt(i) <= 'Z' && value.charAt(i) >= 'A'))
+                return true;
+        }
+        return false;
     }
 }
