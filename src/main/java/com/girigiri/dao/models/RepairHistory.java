@@ -66,15 +66,7 @@ public class RepairHistory {
     private Date created;
     private Date updated;
 
-    @PrePersist
-    protected void onCreate() {
-        created = updated = new Date();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updated = new Date();
-    }
+    private Long managerId;
 
 
     public RepairHistory() {
@@ -191,6 +183,25 @@ public class RepairHistory {
     }
 
 
+    @PrePersist
+    protected void onCreate() {
+        created = updated = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updated = new Date();
+    }
+
+
+    public Long getManagerId() {
+        return managerId;
+    }
+
+    public void setManagerId(Long managerId) {
+        this.managerId = managerId;
+        this.repairState = 2;
+    }
 
     public List<ComponentRequest> getComponentRequests() {
         return componentRequests;

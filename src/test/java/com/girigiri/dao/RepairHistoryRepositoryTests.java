@@ -2,8 +2,10 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.ComponentRequest;
+import com.girigiri.dao.models.Manager;
 import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.services.ComponentRequestRepository;
+import com.girigiri.dao.services.ManagerRepository;
 import com.girigiri.dao.services.RepairHistoryRepository;
 import com.sun.corba.se.spi.logging.CORBALogDomains;
 import org.junit.*;
@@ -55,9 +57,15 @@ public class RepairHistoryRepositoryTests {
     @Autowired
     private ComponentRequestRepository componentRequestRepository;
 
+
+    @Autowired
+    private ManagerRepository managerRepository;
+
     private static Validator validator;
 
     private RepairHistory rep;
+
+    private Manager manager;
 
     @BeforeClass
     public static void onCreate() {
@@ -70,9 +78,11 @@ public class RepairHistoryRepositoryTests {
         mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
+        manager = managerRepository.save(new Manager("guojian", "root", Manager.ROLE_ENGINEER));
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(2);
-        repairHistory.setRepairState(2);
+//        repairHistory.setRepairState(2);
+        repairHistory.setManagerId(manager.getId());
         ComponentRequest request = new ComponentRequest("name", "serial number", 10);
         List<ComponentRequest> componentRequestList = new ArrayList<>();
         componentRequestList.add(request);
@@ -122,43 +132,16 @@ public class RepairHistoryRepositoryTests {
 
 
     @Test
-    public void addHistory() throws Exception {
+    public void addHistoryIsNotAllowed() throws Exception {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(1);
         repairHistory.setRepairState(1);
-        MvcResult result = mockMvc.perform(post("/api/histories")
-                .content(objToJson(repairHistory))
-                .contentType(contentType))
-                .andExpect(status().isCreated())
-                .andReturn();
-    }
-
-
-    @Test
-    public void addHistoryOutOfBoundary() throws Exception {
-        RepairHistory repairHistory = new RepairHistory();
-        repairHistory.setDelayType(0);
-        repairHistory.setRepairState(0);
         mockMvc.perform(post("/api/histories")
                 .content(objToJson(repairHistory))
                 .contentType(contentType))
-                .andExpect(status().isBadRequest());
-        repairHistory.setDelayType(5);
-        repairHistory.setRepairState(4);
-        mockMvc.perform(post("/api/histories")
-                .content(objToJson(repairHistory))
-                .contentType(contentType))
-                .andExpect(status().isBadRequest());
-        repairHistory.setDelayType(1);
-        repairHistory.setRepairState(1);
-        repairHistory.setAssignTime("1234-31-ef");
-        mockMvc.perform(post("/api/histories").content(objToJson(repairHistory)).contentType(contentType))
-                .andExpect(status().isBadRequest());
-        repairHistory.setAssignTime("2016-01-02");
-        repairHistory.setRepairTime("12341esaf");
-        mockMvc.perform(post("/api/histories").content(objToJson(repairHistory)).contentType(contentType))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isMethodNotAllowed());
     }
+
 
     @Test
     public void getHistory() throws Exception {
@@ -166,9 +149,10 @@ public class RepairHistoryRepositoryTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.repairState", is(rep.getRepairState())))
                 .andExpect(jsonPath("$.repairState", is(rep.getDelayType())))
-                .andExpect(jsonPath("$._links.componentRequests.href", is("http://localhost/api/histories/" + rep.getId() + "/componentRequests")))
+//                .andExpect(jsonPath("$.managerId", is(manager.getId())))
                 .andReturn();
-//        System.err.println(result.getResponse().getContentAsString());
+        assert rep.getComponentRequests().size() != 0;
+        System.err.println(result.getResponse().getContentAsString());
     }
 
     @Test
@@ -180,24 +164,41 @@ public class RepairHistoryRepositoryTests {
                 .andExpect(jsonPath("$._embedded.componentRequests", hasSize(rep.getComponentRequests().size())));
     }
 
+
     @Test
-    public void updateHistory() throws Exception {
+    public void updateHistoryWithRightManagerWillSuccess() throws Exception {
         RepairHistory repairHistory = new RepairHistory();
-        repairHistory.setDelayType(3);
-        repairHistory.setRepairState(3);
+        repairHistory.setManagerId(manager.getId());
+        repairHistory.setRepairState(2);
+        repairHistory.setMaterialPrice(200);
         mockMvc.perform(put("/api/histories/{id}", rep.getId())
                 .contentType(contentType)
                 .content(objToJson(repairHistory)))
                 .andExpect(status().isNoContent());
         mockMvc.perform(get("/api/histories/{id}", rep.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.delayType", is(3)))
-                .andExpect(jsonPath("$.repairState", is(3)));
+                .andExpect(jsonPath("$.repairState", is(repairHistory.getRepairState())))
+                .andExpect(jsonPath("$.materialPrice", is(repairHistory.getMaterialPrice())));
+
+    }
+
+
+    @Test
+    public void updateHistoryWithWrongManagerWillFail() throws Exception {
+        Manager manager = managerRepository.save(new Manager("sunpen", "sunpen", Manager.ROLE_USER));
+        RepairHistory repairHistory = new RepairHistory();
+        repairHistory.setDelayType(3);
+        repairHistory.setManagerId(manager.getId());
+        mockMvc.perform(put("/api/histories/{id}", rep.getId())
+                .contentType(contentType)
+                .content(objToJson(repairHistory)))
+                .andExpect(status().isBadRequest());
     }
 
 
     @After
     public void onDestroy() {
+        managerRepository.deleteAll();
         repairHistoryRepository.deleteAll();
         componentRequestRepository.deleteAll();
     }

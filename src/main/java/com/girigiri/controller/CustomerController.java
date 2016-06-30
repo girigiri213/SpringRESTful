@@ -3,6 +3,7 @@ package com.girigiri.controller;
 import com.girigiri.controller.utils.RestUtils;
 import com.girigiri.controller.utils.ViolationError;
 import com.girigiri.dao.models.Customer;
+import com.girigiri.dao.models.Request;
 import com.girigiri.dao.services.CustomerRepository;
 import com.girigiri.dao.services.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,22 @@ public class CustomerController {
         Page<Customer> pages = customerRepository.findAll(new PageRequest(page, 5, new Sort("id")));
         Resources<Customer> resources = new Resources<>(pages);
         resources.add(linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
+        return new ResponseEntity<>(resources, HttpStatus.OK);
+    }
+
+    /**
+     * Return all customers with particular size
+     *
+     * @param size the size of query
+     * @return Current page of customers, and <b>200 OK</b> if success
+     */
+    @RequestMapping(value = "/api/customers", method = RequestMethod.GET, params = {"size"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getCustomersBySize(@RequestParam(value = "size") int size) {
+        Page<Customer> pages = customerRepository.findAll(new PageRequest(1, size, new Sort("id")));
+        Resources<Customer> resources = new Resources<>(pages);
+        resources.add(linkTo(methodOn(CustomerController.class).getCustomersBySize(size)).withSelfRel());
         return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 

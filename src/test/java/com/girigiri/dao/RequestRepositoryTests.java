@@ -30,6 +30,7 @@ import java.util.Set;
 import static com.girigiri.utils.TestUtil.contentType;
 import static com.girigiri.utils.TestUtil.objToJson;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -78,9 +79,7 @@ public class RequestRepositoryTests {
         Device device = new Device(1, "some error", 1);
         Customer cus = new Customer("420302133404031213", "13020202134", "new address", "my contactName");
         Request tmp = new Request(155, "2016-7-7", 1);
-        RepairHistory repairHistory = new RepairHistory();
         tmp.setDevice(device);
-        tmp.setRepairHistory(repairHistory);
         customer = customerRepository.save(cus);
         tmp.setCusId(customer.getId());
         request = requestRepository.save(tmp);
@@ -98,7 +97,7 @@ public class RequestRepositoryTests {
     }
 
     @Test
-    public void addRequest() throws Exception {
+    public void addRequestWillAddRepairHistoryAutomatically() throws Exception {
         Device device = new Device(1, "some error", 1);
         Request tmp = new Request(155, "2016-7-7", 1);
         tmp.setDevice(device);
@@ -108,10 +107,10 @@ public class RequestRepositoryTests {
         MvcResult result = mockMvc.perform(post("/api/requests").content(json)
                 .contentType(contentType))
                 .andExpect(status().isCreated()).andReturn();
-//        long id = getResourceIdFromUrl(result.getResponse().getRedirectedUrl());
-//        result = mockMvc.perform(get("/api/requests/{id}", id))
-//                .andExpect(status().isOk()).andReturn();
         System.out.println(result.getResponse().getContentAsString());
+        mockMvc.perform(get("/api/histories"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.repairHistories", hasSize(1)));
     }
 
     @Test
@@ -119,7 +118,7 @@ public class RequestRepositoryTests {
         Request request = new Request(200, "2041-7-3", 2);
         request.setCusId((long)0);
         request.setDevice(new Device(1, "some error", 1));
-        MvcResult result = mockMvc.perform(post("/api/requests").content(objToJson(request))
+        mockMvc.perform(post("/api/requests").content(objToJson(request))
                 .contentType(contentType))
                 .andExpect(status().isBadRequest()).andReturn();
     }
@@ -175,20 +174,14 @@ public class RequestRepositoryTests {
     }
 
     @Test
-    public void deleteRequestWillDeleteRepairHistoryAndDeviceButNotDeleteCustomer() throws Exception {
+    public void deleteRequestWillDeleteDeviceButNotDeleteCustomer() throws Exception {
         mockMvc.perform(delete("/api/requests/{id}", request.getId()))
                 .andExpect(status().isNoContent());
         mockMvc.perform(get("/api/customers/{id}", request.getCusId()))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/devices/{id}", request.getDevice().getId()))
                 .andExpect(status().isNotFound());
-        mockMvc.perform(get("/api/repairHistories/{id}", request.getRepairHistory().getId()))
-                .andExpect(status().isNotFound());
     }
-
-
-
-
 
     @After
     public void onDestroy() {

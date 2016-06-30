@@ -2,6 +2,7 @@ package com.girigiri.controller;
 
 import com.girigiri.controller.utils.RestUtils;
 import com.girigiri.controller.utils.ViolationError;
+import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.models.Request;
 import com.girigiri.dao.services.CustomerRepository;
 import com.girigiri.dao.services.RequestRepository;
@@ -66,6 +67,9 @@ public class RequestController {
     public
     @ResponseBody
     ResponseEntity<?> save(@RequestBody Request request) {
+        if (request.getRepairHistory() == null) {
+            request.setRepairHistory(new RepairHistory());
+        }
         validateCustomerInRequest(request.getCusId());
         Request rst = requestRepository.save(request);
         Resource<Request> resources = new Resource<>(rst);
@@ -108,6 +112,23 @@ public class RequestController {
 
 
     /**
+     * Return all requests with particular size
+     *
+     * @param size the size of query
+     * @return Current page of requests, and <b>200 OK</b> if success
+     */
+    @RequestMapping(value = "/api/requests", method = RequestMethod.GET, params = {"size"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequestsBySize(@RequestParam(value = "size") int size) {
+        Page<Request> pages = requestRepository.findAll(new PageRequest(1, size, new Sort("id")));
+        Resources<Request> resources = new Resources<>(pages);
+        resources.add(linkTo(methodOn(RequestController.class).getRequestsBySize(size)).withSelfRel());
+        return new ResponseEntity<>(resources, HttpStatus.OK);
+    }
+
+
+    /**
      * Get requests in current page and in given sort order
      * @param page the current page
      * @param sort sort order
@@ -116,7 +137,7 @@ public class RequestController {
     @RequestMapping(value = "/api/requests", method = RequestMethod.GET, params = {"pages", "sort"})
     public
     @ResponseBody
-    ResponseEntity<?> getCustomers(@RequestParam(value = "pages") int page
+    ResponseEntity<?> getRequests(@RequestParam(value = "pages") int page
             , @RequestParam(value = "sort") String sort) {
         Page<Request> pages = requestRepository.findAll(new PageRequest(page, 20, new Sort(sort)));
         Resources<Request> resources = new Resources<>(pages);
