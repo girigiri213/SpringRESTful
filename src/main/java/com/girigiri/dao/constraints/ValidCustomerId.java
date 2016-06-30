@@ -1,8 +1,5 @@
 package com.girigiri.dao.constraints;
 
-import com.girigiri.dao.validators.CustomerIdValidator;
-
-import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;
 

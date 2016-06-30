@@ -11,8 +11,7 @@ import org.springframework.validation.Errors;
  * Created by JianGuo on 6/30/16.
  * Validator for valid customer ID.
  */
-// FIXME: 6/30/16 NullPointerException in customerRepository
-@Component
+@Deprecated
 public class CustomerIdValidator implements org.springframework.validation.Validator {
 
     @Autowired

@@ -184,7 +184,7 @@ public class CustomerController {
 
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    private class CustomerNotFoundException extends RuntimeException {
+    public static class CustomerNotFoundException extends RuntimeException {
         public CustomerNotFoundException(long customerId) {
             super("could not find customer '" + customerId + "'.");
         }
