@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Data;
 import org.hibernate.validator.constraints.Email;
+import org.springframework.hateoas.Link;
 
 import javax.annotation.Nullable;
 import javax.persistence.*;
@@ -28,6 +29,19 @@ public class Customer {
 
     private Date created;
     private Date updated;
+
+
+
+    @Transient
+    private Link _links;
+
+    public Link get_links() {
+        return _links;
+    }
+
+    public void set_links(Link _links) {
+        this._links = _links;
+    }
 
     @PrePersist
     protected void onCreate() {

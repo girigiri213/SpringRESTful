@@ -8,6 +8,6 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  * Created by JianGuo on 6/25/16.
  * DAO service for {@link com.girigiri.dao.models.ComponentRequest}
  */
-//@RepositoryRestResource(exported = false)
+@RepositoryRestResource(exported = false)
 public interface ComponentRequestRepository extends PagingAndSortingRepository<ComponentRequest, Long> {
 }

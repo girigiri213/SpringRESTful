@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.util.Iterator;
 import java.util.Set;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -50,7 +51,13 @@ public class RepairHistoryController {
     public
     @ResponseBody
     ResponseEntity<?> getHistories() {
-        return ResponseEntity.ok(repairHistoryRepository.findAll());
+        Iterable<RepairHistory> iterable = repairHistoryRepository.findAll();
+        Iterator<RepairHistory> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            RepairHistory repairHistory = iterator.next();
+            repairHistory.set_links(linkTo(methodOn(RepairHistoryController.class).getHistory(repairHistory.getId())).withSelfRel());
+        }
+        return ResponseEntity.ok(new Resources<>(iterable));
     }
 
 
@@ -67,7 +74,7 @@ public class RepairHistoryController {
     ResponseEntity<?> getHistories(@RequestParam(value = "pages") int page) {
         Page<RepairHistory> pages = repairHistoryRepository.findAll(new PageRequest(page, 5, new Sort("id")));
         Resources<RepairHistory> resources = new Resources<>(pages);
-        resources.add(linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
+        resources.add(linkTo(methodOn(RepairHistoryController.class).getHistories(page)).withSelfRel());
         return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
@@ -83,7 +90,7 @@ public class RepairHistoryController {
     ResponseEntity<?> getHistoriesBySize(@RequestParam(value = "size") int size) {
         Page<RepairHistory> pages = repairHistoryRepository.findAll(new PageRequest(1, size, new Sort("id")));
         Resources<RepairHistory> resources = new Resources<>(pages);
-        resources.add(linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
+        resources.add(linkTo(methodOn(RepairHistoryController.class).getHistoriesBySize(size)).withSelfRel());
         return new ResponseEntity<>(resources, HttpStatus.OK);
     }
 
@@ -102,7 +109,9 @@ public class RepairHistoryController {
     ResponseEntity<?> getHistory(@PathVariable Long id) {
         validateHistory(id);
         RepairHistory repairHistory = repairHistoryRepository.findOne(id);
-        return new ResponseEntity<>(repairHistory, HttpStatus.OK);
+        repairHistory.set_links(linkTo(methodOn(RepairHistoryController.class).getHistory(id)).withSelfRel());
+//        repairHistory.setComponentRequests(null);
+        return ResponseEntity.ok(new Resource<>(repairHistory));
     }
 
 

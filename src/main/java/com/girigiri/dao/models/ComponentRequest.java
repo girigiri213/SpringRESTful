@@ -41,22 +41,23 @@ public class ComponentRequest {
     @Min(1)
     private int state;
 
+    private int price;
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private ComponentHistory componentHistory;
-
-
-    public ComponentHistory getRepairHistory() {
-        return componentHistory;
+    public int getPrice() {
+        return price;
     }
 
-
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    public void setComponentHistory(ComponentHistory componentHistory) {
-        if (this.componentHistory == null ? componentHistory == null: this.componentHistory.equals(componentHistory)) return;
-        this.componentHistory = componentHistory;
+    public void setPrice(int price) {
+        this.price = price;
     }
 
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
 
     @PrePersist
     protected void onCreate() {
@@ -126,8 +127,6 @@ public class ComponentRequest {
         this.size = size;
         this.state = 1;
     }
-
-
 
 
     @Override

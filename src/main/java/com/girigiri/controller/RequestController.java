@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.util.Iterator;
 import java.util.Set;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -53,8 +54,13 @@ public class RequestController {
     public
     @ResponseBody
     ResponseEntity<?> getRequests() {
-        Resources<Request> resources = new Resources<>(requestRepository.findAll());
-        resources.add(linkTo(methodOn(RequestController.class).getRequests()).withSelfRel());
+        Iterable<Request> iterable = requestRepository.findAll();
+        Iterator<Request> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            Request request = iterator.next();
+            request.set_links(linkTo(methodOn(RequestController.class).getRequest(request.getId())).withSelfRel());
+        }
+        Resources<Request> resources = new Resources<>(iterable);
         return ResponseEntity.ok(resources);
     }
 
@@ -105,7 +111,9 @@ public class RequestController {
     @ResponseBody
     ResponseEntity<?> getRequest(@PathVariable Long id) {
         validateRequest(id);
-        return new ResponseEntity<>(requestRepository.findOne(id), HttpStatus.OK);
+        Request request = requestRepository.findOne(id);
+        request.set_links(linkTo(methodOn(RequestController.class).getRequest(id)).withSelfRel());
+        return new ResponseEntity<>(new Resource<>(request), HttpStatus.OK);
     }
 
 

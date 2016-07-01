@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import java.util.Iterator;
 import java.util.Set;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -49,8 +50,13 @@ public class CustomerController {
     public
     @ResponseBody
     ResponseEntity<?> getCustomers() {
-        Resources<Customer> resources = new Resources<>(customerRepository.findAll());
-        resources.add(linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
+        Iterable<Customer> iterable = customerRepository.findAll();
+        Iterator<Customer> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            Customer customer = iterator.next();
+            customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel());
+        }
+        Resources<Customer> resources = new Resources<>(iterable);
         return ResponseEntity.ok(resources);
     }
 
@@ -112,9 +118,9 @@ public class CustomerController {
     @ResponseBody
     ResponseEntity<?> getCustomer(@PathVariable Long id) {
         validateCustomer(id);
-        Resource<Customer> resources = new Resource<>(customerRepository.findOne(id));
-        resources.add(linkTo(methodOn(CustomerController.class).getCustomer(id)).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
+        Customer customer = customerRepository.findOne(id);
+        customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(id)).withSelfRel());
+        return ResponseEntity.ok(new Resource<>(customer));
     }
 
 
