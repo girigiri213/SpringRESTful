@@ -6,6 +6,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import java.security.SecureRandom;
 import java.util.Date;
 
 
@@ -38,7 +39,7 @@ public class Manager {
 
     private String name;
 
-    private @JsonIgnore
+    private
     String password;
 
 

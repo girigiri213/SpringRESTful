@@ -10,4 +10,5 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
  */
 @RepositoryRestResource(exported = false)
 public interface ManagerRepository extends CrudRepository<Manager, Long> {
+    Manager findOneByName(String name);
 }
