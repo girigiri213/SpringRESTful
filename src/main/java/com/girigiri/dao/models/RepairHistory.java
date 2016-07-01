@@ -59,8 +59,8 @@ public class RepairHistory {
     private int delayType;
 
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<ComponentRequest> componentRequests = new ArrayList<>();
+//    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+//    private List<ComponentRequest> componentRequests = new ArrayList<>();
 
     @Version
     @JsonIgnore
@@ -217,18 +217,18 @@ public class RepairHistory {
         this.repairState = 2;
     }
 
-    public List<ComponentRequest> getComponentRequests() {
-        return componentRequests;
-    }
-
-    public void setComponentRequests(List<ComponentRequest> componentRequests) {
-        this.componentRequests = componentRequests;
-    }
-
-    public void addComponentRequest(ComponentRequest componentRequest) {
-        if (componentRequests.contains(componentRequest)) return;
-        componentRequests.add(componentRequest);
-    }
+//    public List<ComponentRequest> getComponentRequests() {
+//        return componentRequests;
+//    }
+//
+//    public void setComponentRequests(List<ComponentRequest> componentRequests) {
+//        this.componentRequests = componentRequests;
+//    }
+//
+//    public void addComponentRequest(ComponentRequest componentRequest) {
+//        if (componentRequests.contains(componentRequest)) return;
+//        componentRequests.add(componentRequest);
+//    }
 
     @Override
     public boolean equals(Object o) {

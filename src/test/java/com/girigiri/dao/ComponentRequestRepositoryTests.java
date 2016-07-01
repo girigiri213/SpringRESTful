@@ -2,8 +2,11 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.ComponentRequest;
+import com.girigiri.dao.models.Manager;
 import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.services.ComponentRequestRepository;
+import com.girigiri.dao.services.ManagerRepository;
+import com.girigiri.dao.services.RepairHistoryRepository;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -45,8 +48,11 @@ public class ComponentRequestRepositoryTests {
 
     @Autowired
     private ComponentRequestRepository componentRequestRepository;
+    @Autowired
+    private ManagerRepository managerRepository;
 
-    private long setupId;
+    @Autowired
+    private RepairHistoryRepository repairHistoryRepository;
 
     private ComponentRequest componentRequest;
     @BeforeClass
@@ -60,23 +66,30 @@ public class ComponentRequestRepositoryTests {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
+        Manager manager = managerRepository.save(new Manager("guojian", "password", Manager.ROLE_ENGINEER));
         RepairHistory repairHistory = new RepairHistory();
-        componentRequest = componentRequestRepository.save(new ComponentRequest("component name", "serial", 10));
-        setupId = componentRequest.getId();
+        repairHistory.setRepairState(1);
+        repairHistory.setManagerId(manager.getId());
+        repairHistory.setName("name");
+        RepairHistory rst = repairHistoryRepository.save(repairHistory);
+        ComponentRequest componentRequest = new ComponentRequest("component name", "serial", 10);
+        componentRequest.setHistory(rst.getId());
+        this.componentRequest = componentRequestRepository.save(componentRequest);
     }
 
 
     @Test
     public void addComponentRequest() throws Exception {
         ComponentRequest componentRequest = new ComponentRequest("component name", "serial", 10);
-        mockMvc.perform(post("/api/componentRequests").content(objToJson(componentRequest)).contentType(contentType))
+        componentRequest.setHistory(this.componentRequest.getHistory());
+        mockMvc.perform(post("/api/com_requests").content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isCreated());
     }
 
 
     @Test
     public void getComponentRequest() throws Exception {
-        mockMvc.perform(get("/api/componentRequests/{id}", setupId))
+        mockMvc.perform(get("/api/com_requests/{id}", componentRequest.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(componentRequest.getName())))
                 .andExpect(jsonPath("$.size", is(componentRequest.getSize())));
@@ -84,11 +97,12 @@ public class ComponentRequestRepositoryTests {
 
     @Test
     public void updateComponentRequest() throws Exception {
-        componentRequest = new ComponentRequest("component name", "serial", 10);
-        mockMvc.perform(put("/api/componentRequests/{id}", setupId).content(objToJson(componentRequest)).contentType(contentType))
+        ComponentRequest componentRequest = new ComponentRequest("component name", "serial", 10);
+        componentRequest.setHistory(this.componentRequest.getHistory());
+        mockMvc.perform(put("/api/com_requests/{id}", this.componentRequest.getId()).content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/componentRequests/{id}", setupId))
+        mockMvc.perform(get("/api/com_requests/{id}", this.componentRequest.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(componentRequest.getName())))
                 .andExpect(jsonPath("$.size", is(componentRequest.getSize())));
@@ -96,7 +110,7 @@ public class ComponentRequestRepositoryTests {
 
     @Test
     public void deleteComponentRequest() throws Exception {
-        mockMvc.perform(delete("/api/componentRequests/{id}", setupId))
+        mockMvc.perform(delete("/api/com_requests/{id}", componentRequest.getId()))
                 .andExpect(status().isNoContent());
     }
 
@@ -122,7 +136,7 @@ public class ComponentRequestRepositoryTests {
     @Test
     public void addInvalidComponentRequest() throws Exception {
         componentRequest = new ComponentRequest("component name", "serial", -10);
-        mockMvc.perform(post("/api/componentRequests").content(objToJson(componentRequest)).contentType(contentType))
+        mockMvc.perform(post("/api/com_requests").content(objToJson(componentRequest)).contentType(contentType))
                 .andExpect(status().isBadRequest());
     }
 

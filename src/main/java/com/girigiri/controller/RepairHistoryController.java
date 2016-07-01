@@ -195,7 +195,7 @@ public class RepairHistoryController {
     private void compareAndUpdate(RepairHistory before, RepairHistory after) {
         before.setCheckHistory(after.getCheckHistory());
         before.setRepairState(after.getRepairState());
-        before.setComponentRequests(after.getComponentRequests());
+//        before.setComponentRequests(after.getComponentRequests());
         before.setDelayType(after.getDelayType());
         before.setAssignTime(after.getAssignTime());
         before.setManPrice(after.getManPrice());

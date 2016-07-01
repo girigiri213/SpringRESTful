@@ -5,9 +5,6 @@ import com.girigiri.dao.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by JianGuo on 6/25/16.
  * database loader for init.
@@ -44,14 +41,14 @@ public class DatabaseLoader implements CommandLineRunner {
         repairHistory.setDelayType(1);
         repairHistory.setRepairState(1);
         request.setRepairHistory(repairHistory);
-        List<ComponentRequest> list = new ArrayList<>();
         ComponentRequest componentRequest = new ComponentRequest("name", "serial", 100);
         componentRequest.setState(1);
-        list.add(componentRequest);
+        componentRequest.setHistory(1);
+        componentRequestRepository.save(componentRequest);
         componentRequest = new ComponentRequest("other name", "other serial", 200);
-        list.add(componentRequest);
-        componentRequest.setState(1);
-        repairHistory.setComponentRequests(list);
+        componentRequest.setHistory(2);
+        componentRequest.setState(2);
+        componentRequestRepository.save(componentRequest);
         requestRepository.save(request);
 
         Customer customer1 = new Customer("420104199601021617", "13018060139", "my new address", "my new contactName");

@@ -86,7 +86,7 @@ public class RepairHistoryRepositoryTests {
         ComponentRequest request = new ComponentRequest("name", "serial number", 10);
         List<ComponentRequest> componentRequestList = new ArrayList<>();
         componentRequestList.add(request);
-        repairHistory.setComponentRequests(componentRequestList);
+//        repairHistory.setComponentRequests(componentRequestList);
         rep = repairHistoryRepository.save(repairHistory);
     }
 
@@ -149,7 +149,6 @@ public class RepairHistoryRepositoryTests {
                 .andExpect(jsonPath("$.repairState", is(rep.getDelayType())))
 //                .andExpect(jsonPath("$.managerId", is(manager.getId())))
                 .andReturn();
-        assert rep.getComponentRequests().size() != 0;
         System.err.println(result.getResponse().getContentAsString());
     }
 
@@ -157,9 +156,8 @@ public class RepairHistoryRepositoryTests {
     public void removeHistoryWillNotRemoveComponentRequest() throws Exception {
         mockMvc.perform(delete("/api/histories/{id}", rep.getId()))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get("/api/componentRequests"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.componentRequests", hasSize(rep.getComponentRequests().size())));
+        mockMvc.perform(get("/api/com_requests"))
+                .andExpect(status().isOk());
     }
 
 
@@ -171,7 +169,6 @@ public class RepairHistoryRepositoryTests {
         List<ComponentRequest> list = new ArrayList<>();
         ComponentRequest componentRequest = new ComponentRequest("name", "new serial", 10);
         list.add(componentRequest);
-        repairHistory.setComponentRequests(list);
         mockMvc.perform(put("/api/histories/{id}", rep.getId())
                 .contentType(contentType)
                 .content(objToJson(repairHistory)))

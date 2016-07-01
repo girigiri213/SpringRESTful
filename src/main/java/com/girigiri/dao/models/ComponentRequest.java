@@ -2,12 +2,14 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.hateoas.Link;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+
 
 /**
  * Created by JianGuo on 6/24/16.
@@ -42,6 +44,28 @@ public class ComponentRequest {
     private int state;
 
     private int price;
+
+
+    private long history;
+
+    @Transient
+    private Link _link;
+
+    public Link get_link() {
+        return _link;
+    }
+
+    public void set_link(Link _link) {
+        this._link = _link;
+    }
+
+    public long getHistory() {
+        return history;
+    }
+
+    public void setHistory(long history) {
+        this.history = history;
+    }
 
     public int getPrice() {
         return price;
@@ -115,6 +139,11 @@ public class ComponentRequest {
     public Long getId() {
         return id;
     }
+
+
+
+
+
 
     public ComponentRequest() {
         this.state = 1;
