@@ -62,36 +62,36 @@ public class Device {
 
     private String other;
 
-    private Date created;
-    private Date updated;
+    private Long created;
+    private Long updated;
 
     @PrePersist
     protected void onCreate() {
-        created = updated = new Date();
+        created = updated = new Date().getTime();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated = new Date();
+        updated = new Date().getTime();
     }
 
     public Long getCreated() {
-        return created.getTime();
+        return created;
     }
 
-    public void setCreated(Date created) {
-        if (created == null) {
-            return;
-        }
-        this.created = created;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
+//    public void setCreated(Date created) {
+//        if (created == null) {
+//            return;
+//        }
+//        this.created = created;
+//    }
+//
+//    public void setUpdated(Date updated) {
+//        this.updated = updated;
+//    }
 
     public Long getUpdated() {
-        return updated.getTime();
+        return updated;
     }
 
     @Version
