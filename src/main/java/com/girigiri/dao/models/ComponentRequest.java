@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -36,9 +37,26 @@ public class ComponentRequest {
     private Date created;
     private Date updated;
 
-//    @ManyToOne(cascade = {CascadeType.ALL})
-//    @JoinColumn(name = "HIS_ID", nullable = false)
-//    private RepairHistory repairHistory;
+    @Max(3)
+    @Min(1)
+    private int state;
+
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private ComponentHistory componentHistory;
+
+
+    public ComponentHistory getRepairHistory() {
+        return componentHistory;
+    }
+
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    public void setComponentHistory(ComponentHistory componentHistory) {
+        if (this.componentHistory == null ? componentHistory == null: this.componentHistory.equals(componentHistory)) return;
+        this.componentHistory = componentHistory;
+    }
+
 
     @PrePersist
     protected void onCreate() {
@@ -98,6 +116,7 @@ public class ComponentRequest {
     }
 
     public ComponentRequest() {
+        this.state = 1;
     }
 
 
@@ -105,7 +124,7 @@ public class ComponentRequest {
         this.name = name;
         this.serial = serial;
         this.size = size;
-//        this.repairHistory = repairHistory;
+        this.state = 1;
     }
 
 

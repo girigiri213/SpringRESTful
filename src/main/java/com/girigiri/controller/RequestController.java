@@ -105,9 +105,7 @@ public class RequestController {
     @ResponseBody
     ResponseEntity<?> getRequest(@PathVariable Long id) {
         validateRequest(id);
-        Resource<Request> resources = new Resource<>(requestRepository.findOne(id));
-        resources.add(linkTo(methodOn(RequestController.class).getRequest(id)).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
+        return new ResponseEntity<>(requestRepository.findOne(id), HttpStatus.OK);
     }
 
 
