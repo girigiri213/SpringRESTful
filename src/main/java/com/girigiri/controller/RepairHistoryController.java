@@ -25,6 +25,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * Created by JianGuo on 6/30/16.
+ * Rest Controller for {@link RepairHistoryRepository}
+ * Because system will create a history when a request comes, so save a history directly is not allowed currently.
  */
 @RestController
 public class RepairHistoryController {
@@ -48,28 +50,9 @@ public class RepairHistoryController {
     public
     @ResponseBody
     ResponseEntity<?> getHistories() {
-        Resources<RepairHistory> resources = new Resources<>(repairHistoryRepository.findAll());
-        resources.add(linkTo(methodOn(RepairHistoryController.class).getHistories()).withSelfRel());
-        return ResponseEntity.ok(resources);
+        return ResponseEntity.ok(repairHistoryRepository.findAll());
     }
 
-    /**
-     * Save a repairHistories using {@link RequestMethod}.POST method
-     *
-     * @param history the json posted, it will be converted to POJO
-     * @return <b>201 Created</b> if created success
-     */
-    //TODO: Deprecated this for system will create history per request automatically
-//    @RequestMapping(value = "/api/histories", method = RequestMethod.POST)
-//    public
-//    @ResponseBody
-//    ResponseEntity<?> save(@RequestBody RepairHistory history) {
-//        validateHistoryByManager(history);
-//        RepairHistory rst = repairHistoryRepository.save(history);
-//        Resource<RepairHistory> resources = new Resource<>(rst);
-//        resources.add(linkTo(methodOn(RepairHistoryController.class).getHistory(rst.getId())).withSelfRel());
-//        return new ResponseEntity<>(resources, HttpStatus.CREATED);
-//    }
 
 
     /**
@@ -118,9 +101,8 @@ public class RepairHistoryController {
     @ResponseBody
     ResponseEntity<?> getHistory(@PathVariable Long id) {
         validateHistory(id);
-        Resource<RepairHistory> resources = new Resource<>(repairHistoryRepository.findOne(id));
-        resources.add(linkTo(methodOn(RepairHistoryController.class).getHistory(id)).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
+        RepairHistory repairHistory = repairHistoryRepository.findOne(id);
+        return new ResponseEntity<>(repairHistory, HttpStatus.OK);
     }
 
 

@@ -26,36 +26,36 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private Long created;
-    private Long updated;
+    private Date created;
+    private Date updated;
 
     @PrePersist
     protected void onCreate() {
-        created = updated = new Date().getTime();
+        created = updated = new Date();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated = new Date().getTime();
+        updated = new Date();
     }
 
     public Long getCreated() {
-        return created;
+        return created.getTime();
     }
 
-    public void setCreated(Long created) {
+    public void setCreated(Date created) {
         if (created == null) {
             return;
         }
         this.created = created;
     }
 
-    public void setUpdated(Long updated) {
+    public void setUpdated(Date updated) {
         this.updated = updated;
     }
 
     public Long getUpdated() {
-        return updated;
+        return updated.getTime();
     }
 
 

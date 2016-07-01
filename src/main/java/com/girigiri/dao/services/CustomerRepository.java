@@ -9,6 +9,5 @@ import org.springframework.stereotype.Component;
  * DAO service for model {@link Customer}
  */
 //@RepositoryRestResource(exported = false)
-@Component
 public interface CustomerRepository extends PagingAndSortingRepository<Customer, Long> {
 }

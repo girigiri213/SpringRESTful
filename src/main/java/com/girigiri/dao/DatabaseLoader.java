@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -15,7 +17,7 @@ import java.util.Set;
  * database loader for init.
  */
 //Comment this if you don't want any initial data.
-//@Component
+@Component
 public class DatabaseLoader implements CommandLineRunner {
 
     @Autowired
@@ -46,6 +48,12 @@ public class DatabaseLoader implements CommandLineRunner {
         repairHistory.setDelayType(1);
         repairHistory.setRepairState(1);
         request.setRepairHistory(repairHistory);
+        List<ComponentRequest> list = new ArrayList<>();
+        ComponentRequest componentRequest = new ComponentRequest("name", "serial", 100);
+        list.add(componentRequest);
+        componentRequest = new ComponentRequest("other name", "other serial", 200);
+        list.add(componentRequest);
+        repairHistory.setComponentRequests(list);
         requestRepository.save(request);
 
 //        Customer customer1 = new Customer("420104199601021617", "13018060139", "my new address", "my new contactName");
