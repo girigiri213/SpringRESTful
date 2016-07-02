@@ -86,9 +86,7 @@ public class RepairHistoryRepositoryTests {
         ComponentRequest request = new ComponentRequest("name", "serial number", 10);
         List<ComponentRequest> componentRequestList = new ArrayList<>();
         componentRequestList.add(request);
-        request = new ComponentRequest("new name", "new serial number", 20);
-        componentRequestList.add(request);
-        repairHistory.setComponentRequests(componentRequestList);
+//        repairHistory.setComponentRequests(componentRequestList);
         rep = repairHistoryRepository.save(repairHistory);
     }
 
@@ -151,7 +149,6 @@ public class RepairHistoryRepositoryTests {
                 .andExpect(jsonPath("$.repairState", is(rep.getDelayType())))
 //                .andExpect(jsonPath("$.managerId", is(manager.getId())))
                 .andReturn();
-        assert rep.getComponentRequests().size() != 0;
         System.err.println(result.getResponse().getContentAsString());
     }
 
@@ -159,11 +156,30 @@ public class RepairHistoryRepositoryTests {
     public void removeHistoryWillNotRemoveComponentRequest() throws Exception {
         mockMvc.perform(delete("/api/histories/{id}", rep.getId()))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get("/api/componentRequests"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.componentRequests", hasSize(rep.getComponentRequests().size())));
+        mockMvc.perform(get("/api/com_requests"))
+                .andExpect(status().isOk());
     }
 
+
+
+    @Test
+    public void updateHistoryWithComponentRequestWillSuccess() throws Exception {
+        RepairHistory repairHistory = new RepairHistory();
+        repairHistory.setManagerId(manager.getId());
+        List<ComponentRequest> list = new ArrayList<>();
+        ComponentRequest componentRequest = new ComponentRequest("name", "new serial", 10);
+        list.add(componentRequest);
+        mockMvc.perform(put("/api/histories/{id}", rep.getId())
+                .contentType(contentType)
+                .content(objToJson(repairHistory)))
+                .andExpect(status().isNoContent());
+        MvcResult result = mockMvc.perform(get("/api/histories/{id}", rep.getId())
+                .contentType(contentType)
+                .content(objToJson(repairHistory)))
+                .andExpect(status().isOk()).andReturn();
+        System.err.println(result.getResponse().getContentAsString());
+//                .andExpect(jsonPath("$._embedded.componentRequests", hasSize(rep.getComponentRequests().size() + 1)));
+    }
 
     @Test
     public void updateHistoryWithRightManagerWillSuccess() throws Exception {

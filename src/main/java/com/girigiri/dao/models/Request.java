@@ -3,6 +3,8 @@ package com.girigiri.dao.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.girigiri.dao.constraints.StringDateFormat;
 import lombok.Data;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
@@ -33,29 +35,38 @@ public class Request {
     @Max(3)
     private int state;
 
-    private Date created;
+    private Long created;
 
-    private Date updated;
+    private Long updated;
 
+    @Transient
+    private Link _links;
 
+    public Link get_links() {
+        return _links;
+    }
+
+    public void set_links(Link _links) {
+        this._links = _links;
+    }
 
     public Long getCreated() {
-        return created.getTime();
+        return created;
     }
 
-    public void setCreated(Date created) {
-        if (created == null) {
-            return;
-        }
-        this.created = created;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
+//    public void setCreated(Date created) {
+//        if (created == null) {
+//            return;
+//        }
+//        this.created = created;
+//    }
+//
+//    public void setUpdated(Date updated) {
+//        this.updated = updated;
+//    }
 
     public Long getUpdated() {
-        return updated.getTime();
+        return updated;
     }
 
 
@@ -112,12 +123,12 @@ public class Request {
     @PrePersist
     protected void onCreate() {
 
-        created = updated = new Date();
+        created = updated = new Date().getTime();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated = new Date();
+        updated = new Date().getTime();
     }
 
     public Request() {

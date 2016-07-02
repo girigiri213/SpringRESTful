@@ -4,11 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.girigiri.dao.constraints.StringDateFormat;
 import com.girigiri.dao.services.ComponentRepository;
 import lombok.Data;
+import org.springframework.hateoas.Link;
 
+import javax.ejb.EJB;
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -56,18 +59,29 @@ public class RepairHistory {
     private int delayType;
 
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<ComponentRequest> componentRequests;
+//    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+//    private List<ComponentRequest> componentRequests = new ArrayList<>();
 
     @Version
     @JsonIgnore
     private Long version;
 
-    private Date created;
-    private Date updated;
+    private Long created;
+    private Long updated;
 
     private Long managerId;
 
+
+    @Transient
+    private Link _links;
+
+    public Link get_links() {
+        return _links;
+    }
+
+    public void set_links(Link _links) {
+        this._links = _links;
+    }
 
     public RepairHistory() {
         this(1, 1);
@@ -185,12 +199,12 @@ public class RepairHistory {
 
     @PrePersist
     protected void onCreate() {
-        created = updated = new Date();
+        created = updated = new Date().getTime();
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated = new Date();
+        updated = new Date().getTime();
     }
 
 
@@ -203,13 +217,18 @@ public class RepairHistory {
         this.repairState = 2;
     }
 
-    public List<ComponentRequest> getComponentRequests() {
-        return componentRequests;
-    }
-
-    public void setComponentRequests(List<ComponentRequest> componentRequests) {
-        this.componentRequests = componentRequests;
-    }
+//    public List<ComponentRequest> getComponentRequests() {
+//        return componentRequests;
+//    }
+//
+//    public void setComponentRequests(List<ComponentRequest> componentRequests) {
+//        this.componentRequests = componentRequests;
+//    }
+//
+//    public void addComponentRequest(ComponentRequest componentRequest) {
+//        if (componentRequests.contains(componentRequest)) return;
+//        componentRequests.add(componentRequest);
+//    }
 
     @Override
     public boolean equals(Object o) {
@@ -234,22 +253,22 @@ public class RepairHistory {
     }
 
     public Long getCreated() {
-        return created.getTime();
+        return created;
     }
 
-    public void setCreated(Date created) {
-        if (created == null) {
-            return;
-        }
-        this.created = created;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
+//    public void setCreated(Date created) {
+//        if (created == null) {
+//            return;
+//        }
+//        this.created = created;
+//    }
+//
+//    public void setUpdated(Date updated) {
+//        this.updated = updated;
+//    }
 
     public Long getUpdated() {
-        return updated.getTime();
+        return updated;
     }
 
     @Override
