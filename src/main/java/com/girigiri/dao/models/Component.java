@@ -56,17 +56,6 @@ public class Component {
         return created;
     }
 
-    public void setCreated(Long created) {
-        if (created == null) {
-            return;
-        }
-        this.created = created;
-    }
-
-    public void setUpdated(Long updated) {
-        this.updated = updated;
-    }
-
     public Long getUpdated() {
         return updated;
     }

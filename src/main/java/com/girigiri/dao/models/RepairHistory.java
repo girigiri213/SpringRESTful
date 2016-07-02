@@ -2,19 +2,13 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.girigiri.dao.constraints.StringDateFormat;
-import com.girigiri.dao.services.ComponentRepository;
 import lombok.Data;
 import org.springframework.hateoas.Link;
 
-import javax.ejb.EJB;
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Created by JianGuo on 6/24/16.
@@ -255,17 +249,6 @@ public class RepairHistory {
     public Long getCreated() {
         return created;
     }
-
-//    public void setCreated(Date created) {
-//        if (created == null) {
-//            return;
-//        }
-//        this.created = created;
-//    }
-//
-//    public void setUpdated(Date updated) {
-//        this.updated = updated;
-//    }
 
     public Long getUpdated() {
         return updated;

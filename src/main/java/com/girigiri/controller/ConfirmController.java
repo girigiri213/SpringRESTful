@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/api/confirm")
-public class ConfirmController {
+public class ConfirmController extends BaseController {
     private final CustomerRepository customerRepository;
     private final DeviceRepository deviceRepository;
 

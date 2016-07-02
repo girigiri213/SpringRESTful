@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.girigiri.dao.constraints.StringDateFormat;
 import lombok.Data;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.Links;
 
 import javax.persistence.*;
 import javax.validation.constraints.Max;
@@ -54,16 +53,6 @@ public class Request {
         return created;
     }
 
-//    public void setCreated(Date created) {
-//        if (created == null) {
-//            return;
-//        }
-//        this.created = created;
-//    }
-//
-//    public void setUpdated(Date updated) {
-//        this.updated = updated;
-//    }
 
     public Long getUpdated() {
         return updated;

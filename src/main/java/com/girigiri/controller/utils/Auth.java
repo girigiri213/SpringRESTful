@@ -2,6 +2,7 @@ package com.girigiri.controller.utils;
 
 /**
  * Created by JianGuo on 7/1/16.
+ * POJO for auth in {@link com.girigiri.controller.LoginController}
  */
 public class Auth {
 

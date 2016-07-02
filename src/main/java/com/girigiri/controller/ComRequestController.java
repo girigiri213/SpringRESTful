@@ -1,22 +1,18 @@
 package com.girigiri.controller;
 
 import com.girigiri.controller.utils.RestUtils;
-import com.girigiri.controller.utils.ViolationError;
 import com.girigiri.dao.models.ComponentRequest;
-import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.services.ComponentRequestRepository;
 import com.girigiri.dao.services.RepairHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import java.util.Iterator;
-import java.util.Set;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -27,7 +23,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  */
 @RestController
 @RequestMapping(value = "/api/com_requests")
-public class ComRequestController {
+public class ComRequestController extends BaseController {
 
 
     private final ComponentRequestRepository componentRequestRepository;
@@ -39,18 +35,71 @@ public class ComRequestController {
         this.historyRepository = repairHistoryRepository;
     }
 
-    @RequestMapping(value = "" , method = RequestMethod.GET)
+    @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<?> getAllRequests() {
         Iterable<ComponentRequest> iterable = componentRequestRepository.findAll();
-        Iterator<ComponentRequest> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            ComponentRequest componentRequest = iterator.next();
+        for (ComponentRequest componentRequest : iterable) {
             componentRequest.set_link(linkTo(methodOn(ComRequestController.class).getRequest(componentRequest.getId())).withSelfRel());
         }
-
         return ResponseEntity.ok(new Resources<>(iterable));
     }
+
+
+    /**
+     * Return all componentRequests with particular size
+     *
+     * @param size the size of query
+     * @return Current page of componentRequests, and <b>200 OK</b> if success
+     */
+    @RequestMapping(value = "", method = RequestMethod.GET, params = {"size"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequestsBySize(@RequestParam(value = "size") int size) {
+        return getRequestsByPage(0, size, "id");
+    }
+
+    /**
+     * Return all componentRequests with particular size
+     * @param page the page of query, note that page starts from <b>0</b>, not <b>1</b>
+     * @param size the size of query
+     * @param sort the sort column, id by default
+     * @return Current page of componentRequests, and <b>200 OK</b> if success
+     */
+    @RequestMapping(value = "", method = RequestMethod.GET, params = {"pages", "size", "sort"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequests(@RequestParam(value = "pages") int page, @RequestParam(value = "size") int size, @RequestParam(value = "sort") String sort) {
+        return getRequestsByPage(page, size, sort);
+    }
+
+
+    /**
+     * Return all componentRequests with particular size
+     * @param page the page of query, note that page starts from <b>0</b>, not <b>1</b>
+     * @return Current page of componentRequests, and <b>200 OK</b> if success
+     */
+    @RequestMapping(value = "", method = RequestMethod.GET, params = {"pages"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequestsByPage(@RequestParam(value = "pages") int page) {
+        return getRequestsByPage(page, DEFAULT_PAGE_SIZE, "id");
+    }
+
+
+    /**
+     * Return all componentRequests with particular size
+     * @param page the page of query, note that page starts from <b>0</b>, not <b>1</b>
+     * @param sort the sort column, id by default
+     * @return Current page of componentRequests, and <b>200 OK</b> if success
+     */
+    @RequestMapping(value = "", method = RequestMethod.GET, params = {"pages", "sort"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequestsByPageAndSort(@RequestParam(value = "pages") int page, @RequestParam(value = "sort") String sort) {
+        return getRequestsByPage(page, DEFAULT_PAGE_SIZE, sort);
+    }
+
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
@@ -66,7 +115,7 @@ public class ComRequestController {
      * Update a existed componentRequest using {@link RequestMethod}.PUT method,
      * PATCH method is not allowed here currently
      *
-     * @param id      the repairHistory id
+     * @param id               the repairHistory id
      * @param componentRequest the updating componentRequest, formatted in json
      * @return <b>204 No Content</b> if success
      */
@@ -110,39 +159,26 @@ public class ComRequestController {
     }
 
 
+    private ResponseEntity<?> getRequestsByPage(int page, int size, String sort) {
+        Page<ComponentRequest> pages = componentRequestRepository.findAll(new PageRequest(page, size, new Sort(sort)));
+        pages.forEach(componentRequest -> componentRequest.set_link(linkTo(methodOn(ComRequestController.class).getRequest(componentRequest.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resource<>(pages));
+    }
+
+
     private void checkWithHistoryId(long history) {
         if (!historyRepository.exists(history)) {
-            throw new InvalidHistoryException(history);
+            throw new RestUtils.InvalidHistoryException(history);
         }
     }
 
     private void validateId(Long id) {
         if (!componentRequestRepository.exists(id)) {
-            throw new ComponentRequestNotFoundException(id);
-        }
-    }
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    private class ComponentRequestNotFoundException extends RuntimeException {
-        ComponentRequestNotFoundException(Long id) {
-            super("can not found component request " + id);
-        }
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private class InvalidHistoryException extends RuntimeException {
-        InvalidHistoryException(long history) {
-            super("invalid with history id " + history);
+            throw new RestUtils.ComponentRequestNotFoundException(id);
         }
     }
 
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ResponseEntity<?> processFieldErrors(ConstraintViolationException exception) {
-        Set<ConstraintViolation<?>> set = exception.getConstraintViolations();
-        Resource<ViolationError> resource = new Resource<>(RestUtils.generateError(set));
-        return new ResponseEntity<>(resource, HttpStatus.BAD_REQUEST);
-    }
+
+
 }

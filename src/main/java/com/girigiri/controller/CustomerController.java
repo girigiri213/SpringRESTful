@@ -1,9 +1,7 @@
 package com.girigiri.controller;
 
 import com.girigiri.controller.utils.RestUtils;
-import com.girigiri.controller.utils.ViolationError;
 import com.girigiri.dao.models.Customer;
-import com.girigiri.dao.models.Request;
 import com.girigiri.dao.services.CustomerRepository;
 import com.girigiri.dao.services.RequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import java.util.Iterator;
-import java.util.Set;
-
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -29,7 +22,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * Custom RestController for {@link com.girigiri.dao.models.Customer}
  */
 @RestController
-public class CustomerController {
+@RequestMapping(value = "/api/customers")
+public class CustomerController extends BaseController {
 
     private final CustomerRepository customerRepository;
 
@@ -44,16 +38,15 @@ public class CustomerController {
 
     /**
      * Get all customers in /api/customers
+     *
      * @return the {@link ResponseEntity} of all customers, <b>200 OK</b> is also returned if success
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getCustomers() {
         Iterable<Customer> iterable = customerRepository.findAll();
-        Iterator<Customer> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            Customer customer = iterator.next();
+        for (Customer customer : iterable) {
             customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel());
         }
         Resources<Customer> resources = new Resources<>(iterable);
@@ -62,10 +55,11 @@ public class CustomerController {
 
     /**
      * Save a customer using {@link RequestMethod}.POST method
+     *
      * @param customer the json posted, it will be converted to POJO
      * @return <b>201 Created</b> if created success
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity<?> save(@RequestBody Customer customer) {
@@ -77,17 +71,16 @@ public class CustomerController {
 
     /**
      * Return all customers in pages
-     * @param page the number of current page, each page's size is 5
+     *
+     * @param page the number of current page, each page's size is {@link BaseController#DEFAULT_PAGE_SIZE},
+     *             note that page starts in <b>0</b>, not <b>1</b>
      * @return Current page of customers, and <b>200 OK</b> if success
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.GET, params = {"pages"})
+    @RequestMapping(method = RequestMethod.GET, params = {"pages"})
     public
     @ResponseBody
     ResponseEntity<?> getCustomers(@RequestParam(value = "pages") int page) {
-        Page<Customer> pages = customerRepository.findAll(new PageRequest(page, 5, new Sort("id")));
-        Resources<Customer> resources = new Resources<>(pages);
-        resources.add(linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
+        return getCustomersByPage(page, DEFAULT_PAGE_SIZE, "id");
     }
 
     /**
@@ -96,24 +89,22 @@ public class CustomerController {
      * @param size the size of query
      * @return Current page of customers, and <b>200 OK</b> if success
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.GET, params = {"size"})
+    @RequestMapping(method = RequestMethod.GET, params = {"size"})
     public
     @ResponseBody
     ResponseEntity<?> getCustomersBySize(@RequestParam(value = "size") int size) {
-        Page<Customer> pages = customerRepository.findAll(new PageRequest(1, size, new Sort("id")));
-        Resources<Customer> resources = new Resources<>(pages);
-        resources.add(linkTo(methodOn(CustomerController.class).getCustomersBySize(size)).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
+        return getCustomersByPage(0, size, "id");
     }
 
 
     /**
      * Get one customer by id
+     *
      * @param id the customer id
      * @return the customer json and <b>200 OK</b> if customer exists, <b>404 NOT FOUND</b> if customer
      * doesn't exist.
      */
-    @RequestMapping(value = "/api/customers/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getCustomer(@PathVariable Long id) {
@@ -126,27 +117,42 @@ public class CustomerController {
 
     /**
      * Get customers in current page and in given sort order
-     * @param page the current page
+     *
+     * @param page the current page, default size is {@link BaseController#DEFAULT_PAGE_SIZE}
+     *             note that page starts from <b>0</b>, not <b>1</b>
      * @param sort sort order
      * @return customers in json and <b>200 OK</b>
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.GET, params = {"pages", "sort"})
+    @RequestMapping(method = RequestMethod.GET, params = {"pages", "sort"})
     public
     @ResponseBody
     ResponseEntity<?> getCustomers(@RequestParam(value = "pages") int page
             , @RequestParam(value = "sort") String sort) {
-        Page<Customer> pages = customerRepository.findAll(new PageRequest(page, 20, new Sort(sort)));
-        Resources<Customer> resources = new Resources<>(pages);
-        resources.add(linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
+        return getCustomersByPage(page, DEFAULT_PAGE_SIZE, sort);
+    }
+
+    /**
+     * Get customers in current page and in given sort order
+     *
+     * @param page the current page, note that page starts from <b>0</b>, not <b>1</b>
+     * @param size each page's size
+     * @param sort sort order
+     * @return customers in json and <b>200 OK</b>
+     */
+    @RequestMapping(method = RequestMethod.GET, params = {"pages", "size", "sort"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getCustomers(@RequestParam(value = "pages") int page, @RequestParam(value = "size") int size, @RequestParam(value = "sort") String sort) {
+        return getCustomersByPage(page, size, sort);
     }
 
     /**
      * Delete a customer in {@link RequestMethod}.DELETE method
+     *
      * @param id the customer id
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/customers/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public
     @ResponseBody
     ResponseEntity<?> delete(@PathVariable Long id) {
@@ -160,11 +166,12 @@ public class CustomerController {
     /**
      * Update a existed customer using {@link RequestMethod}.PUT method,
      * PATCH method is not allowed here currently
-     * @param id the customer id
+     *
+     * @param id       the customer id
      * @param customer the updating customer, formatted in json
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/customers/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public
     @ResponseBody
     ResponseEntity<?> update(@PathVariable Long id, @RequestBody Customer customer) {
@@ -173,6 +180,13 @@ public class CustomerController {
         compareAndUpdate(rst, customer);
         customerRepository.save(rst);
         return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    }
+
+
+    private ResponseEntity<?> getCustomersByPage(int page, int size, String sort) {
+        Page<Customer> pages = customerRepository.findAll(new PageRequest(page, size, new Sort(sort)));
+        pages.forEach(customer -> customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resource<>(pages));
     }
 
     private void compareAndUpdate(Customer before, Customer after) {
@@ -190,28 +204,12 @@ public class CustomerController {
 
     private void validateCustomer(long id) {
         if (!customerRepository.exists(id)) {
-            throw new CustomerNotFoundException(id);
+            throw new RestUtils.CustomerNotFoundException(id);
         }
     }
 
 
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ResponseEntity<?> processFieldErrors(ConstraintViolationException exception) {
-        Set<ConstraintViolation<?>> set = exception.getConstraintViolations();
-        Resource<ViolationError> resource = new Resource<>(RestUtils.generateError(set));
-        return new ResponseEntity<>(resource, HttpStatus.BAD_REQUEST);
-    }
-
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public static class CustomerNotFoundException extends RuntimeException {
-        public CustomerNotFoundException(long customerId) {
-            super("could not find customer '" + customerId + "'.");
-        }
-    }
 
 
 }

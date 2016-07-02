@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping(value = "/api/login")
-public class LoginController {
+public class LoginController extends BaseController {
 
     private final ManagerRepository managerRepository;
 

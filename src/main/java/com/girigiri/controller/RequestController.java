@@ -1,7 +1,6 @@
 package com.girigiri.controller;
 
 import com.girigiri.controller.utils.RestUtils;
-import com.girigiri.controller.utils.ViolationError;
 import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.models.Request;
 import com.girigiri.dao.services.CustomerRepository;
@@ -16,11 +15,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import java.util.Iterator;
-import java.util.Set;
-
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -29,7 +23,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * Custom RestController for {@link Request}
  */
 @RestController
-public class RequestController {
+@RequestMapping(value = "/api/requests")
+public class RequestController extends BaseController {
 
 
     private final RequestRepository requestRepository;
@@ -50,14 +45,12 @@ public class RequestController {
      * Get all requests in /api/requests
      * @return the {@link ResponseEntity} of all requests, <b>200 OK</b> is also returned if success
      */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getRequests() {
         Iterable<Request> iterable = requestRepository.findAll();
-        Iterator<Request> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            Request request = iterator.next();
+        for (Request request : iterable) {
             request.set_links(linkTo(methodOn(RequestController.class).getRequest(request.getId())).withSelfRel());
         }
         Resources<Request> resources = new Resources<>(iterable);
@@ -65,11 +58,76 @@ public class RequestController {
     }
 
     /**
+     * Return all requests in pages
+     * @param page the number of current page, each page's size is {@link BaseController#DEFAULT_PAGE_SIZE},
+     *             note that page starts from <b>0</b>, not <b>1</b>
+     * @return Current page of requests, and <b>200 OK</b> if success
+     */
+    @RequestMapping(method = RequestMethod.GET, params = {"pages"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequests(@RequestParam(value = "pages") int page) {
+        return getRequestsInPage(page, DEFAULT_PAGE_SIZE, "id");
+    }
+
+    /**
+     * Return all requests with particular size
+     *
+     * @param size the size of query
+     * @return Current page of requests, and <b>200 OK</b> if success
+     */
+    @RequestMapping(method = RequestMethod.GET, params = {"size"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequestsBySize(@RequestParam(value = "size") int size) {
+        return getRequestsInPage(0, size, "id");
+    }
+
+
+    /**
+     * Get requests in current page and in given sort order
+     * @param page the current page, default page's size is {@link BaseController#DEFAULT_PAGE_SIZE}
+     * @param sort sort order
+     * @return requests in json and <b>200 OK</b>, note that device json is included
+     */
+    @RequestMapping(method = RequestMethod.GET, params = {"pages", "sort"})
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequestsByPageAndSort(@RequestParam(value = "pages") int page
+            , @RequestParam(value = "sort") String sort) {
+        return getRequestsInPage(page, DEFAULT_PAGE_SIZE, sort);
+    }
+
+
+    private ResponseEntity<?> getRequestsInPage(int page, int size, String sort) {
+        Page<Request> pages = requestRepository.findAll(new PageRequest(page, size, new Sort(sort)));
+        pages.forEach(request -> request.set_links(linkTo(methodOn(RequestController.class).getRequest(request.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resource<>(pages));
+    }
+
+
+    /**
+     * Get one request by id
+     * @param id the request id
+     * @return the request json and <b>200 OK</b> if request exists, <b>404 NOT FOUND</b> if request
+     * doesn't exist.
+     */
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity<?> getRequest(@PathVariable Long id) {
+        validateRequest(id);
+        Request request = requestRepository.findOne(id);
+        request.set_links(linkTo(methodOn(RequestController.class).getRequest(id)).withSelfRel());
+        return new ResponseEntity<>(new Resource<>(request), HttpStatus.OK);
+    }
+
+    /**
      * Save a request using {@link RequestMethod}.POST method
      * @param request the json posted, it will be converted to POJO
      * @return <b>201 Created</b> if created success
      */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity<?> save(@RequestBody Request request) {
@@ -85,78 +143,11 @@ public class RequestController {
 
 
     /**
-     * Return all requests in pages
-     * @param page the number of current page, each page's size is 5
-     * @return Current page of requests, and <b>200 OK</b> if success
-     */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.GET, params = {"pages"})
-    public
-    @ResponseBody
-    ResponseEntity<?> getRequests(@RequestParam(value = "pages") int page) {
-        Page<Request> pages = requestRepository.findAll(new PageRequest(page, 5, new Sort("id")));
-        Resources<Request> resources = new Resources<>(pages);
-        resources.add(linkTo(methodOn(RequestController.class).getRequests()).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
-    }
-
-
-    /**
-     * Get one request by id
-     * @param id the request id
-     * @return the request json and <b>200 OK</b> if request exists, <b>404 NOT FOUND</b> if request
-     * doesn't exist.
-     */
-    @RequestMapping(value = "/api/requests/{id}", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    ResponseEntity<?> getRequest(@PathVariable Long id) {
-        validateRequest(id);
-        Request request = requestRepository.findOne(id);
-        request.set_links(linkTo(methodOn(RequestController.class).getRequest(id)).withSelfRel());
-        return new ResponseEntity<>(new Resource<>(request), HttpStatus.OK);
-    }
-
-
-    /**
-     * Return all requests with particular size
-     *
-     * @param size the size of query
-     * @return Current page of requests, and <b>200 OK</b> if success
-     */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.GET, params = {"size"})
-    public
-    @ResponseBody
-    ResponseEntity<?> getRequestsBySize(@RequestParam(value = "size") int size) {
-        Page<Request> pages = requestRepository.findAll(new PageRequest(1, size, new Sort("id")));
-        Resources<Request> resources = new Resources<>(pages);
-        resources.add(linkTo(methodOn(RequestController.class).getRequestsBySize(size)).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
-    }
-
-
-    /**
-     * Get requests in current page and in given sort order
-     * @param page the current page
-     * @param sort sort order
-     * @return requests in json and <b>200 OK</b>, note that device json is included
-     */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.GET, params = {"pages", "sort"})
-    public
-    @ResponseBody
-    ResponseEntity<?> getRequests(@RequestParam(value = "pages") int page
-            , @RequestParam(value = "sort") String sort) {
-        Page<Request> pages = requestRepository.findAll(new PageRequest(page, 20, new Sort(sort)));
-        Resources<Request> resources = new Resources<>(pages);
-        resources.add(linkTo(methodOn(RequestController.class).getRequests()).withSelfRel());
-        return new ResponseEntity<>(resources, HttpStatus.OK);
-    }
-
-    /**
      * Delete a customer in {@link RequestMethod}.DELETE method
      * @param id the request id
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/requests/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public
     @ResponseBody
     ResponseEntity<?> delete(@PathVariable Long id) {
@@ -173,7 +164,7 @@ public class RequestController {
      * @param request the updating request, formatted in json
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/requests/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public
     @ResponseBody
     ResponseEntity<?> update(@PathVariable Long id, @RequestBody Request request) {
@@ -186,27 +177,21 @@ public class RequestController {
     }
 
 
-    void validateRequest(long id) {
+    private void validateRequest(long id) {
         if (!requestRepository.exists(id)) {
-            throw new RequestNotFoundException(id);
+            throw new RestUtils.RequestNotFoundException(id);
         }
     }
 
-    void validateCustomerInRequest(long id) {
+    private void validateCustomerInRequest(long id) {
         if (!customerRepository.exists(id)) {
-            throw new InvalidCustomerException(id);
+            throw new RestUtils.InvalidCustomerException(id);
         }
     }
 
 
 
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private static class InvalidCustomerException extends RuntimeException {
-        InvalidCustomerException(long customerId) {
-            super("Can not find customerId " + customerId);
-        }
-    }
 
     private void compareAndUpdate(Request before, Request after) {
         before.setDevice(after.getDevice());
@@ -221,22 +206,6 @@ public class RequestController {
 
 
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ResponseEntity<?> processFieldErrors(ConstraintViolationException exception) {
-        Set<ConstraintViolation<?>> set = exception.getConstraintViolations();
-        Resource<ViolationError> resource = new Resource<>(RestUtils.generateError(set));
-        return new ResponseEntity<>(resource, HttpStatus.BAD_REQUEST);
-    }
-
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    private static class RequestNotFoundException extends RuntimeException {
-        RequestNotFoundException(long customerId) {
-            super("could not find request '" + customerId + "'.");
-        }
-    }
 
 
 }

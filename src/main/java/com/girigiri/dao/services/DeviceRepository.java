@@ -4,7 +4,6 @@ import com.girigiri.dao.models.Device;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
-import org.springframework.hateoas.config.EnableHypermediaSupport;
 
 /**
  * Created by JianGuo on 6/25/16.
