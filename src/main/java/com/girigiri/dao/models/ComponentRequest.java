@@ -49,14 +49,14 @@ public class ComponentRequest {
     private long history;
 
     @Transient
-    private Link _link;
+    private Link _links;
 
-    public Link get_link() {
-        return _link;
+    public Link get_links() {
+        return _links;
     }
 
-    public void set_link(Link _link) {
-        this._link = _link;
+    public void set_links(Link _links) {
+        this._links = _links;
     }
 
     public long getHistory() {

@@ -40,7 +40,7 @@ public class ComRequestController extends BaseController {
     public ResponseEntity<?> getAllRequests() {
         Iterable<ComponentRequest> iterable = componentRequestRepository.findAll();
         for (ComponentRequest componentRequest : iterable) {
-            componentRequest.set_link(linkTo(methodOn(ComRequestController.class).getRequest(componentRequest.getId())).withSelfRel());
+            componentRequest.set_links(linkTo(methodOn(ComRequestController.class).getRequest(componentRequest.getId())).withSelfRel());
         }
         return ResponseEntity.ok(new Resources<>(iterable));
     }
@@ -106,7 +106,7 @@ public class ComRequestController extends BaseController {
     public ResponseEntity<?> getRequest(@PathVariable Long id) {
         validateId(id);
         ComponentRequest componentRequest = componentRequestRepository.findOne(id);
-        componentRequest.set_link(linkTo(methodOn(ComRequestController.class).getRequest(id)).withSelfRel());
+        componentRequest.set_links(linkTo(methodOn(ComRequestController.class).getRequest(id)).withSelfRel());
         return ResponseEntity.ok(new Resource<>(componentRequest));
     }
 
@@ -161,7 +161,7 @@ public class ComRequestController extends BaseController {
 
     private ResponseEntity<?> getRequestsByPage(int page, int size, String sort) {
         Page<ComponentRequest> pages = componentRequestRepository.findAll(new PageRequest(page, size, new Sort(sort)));
-        pages.forEach(componentRequest -> componentRequest.set_link(linkTo(methodOn(ComRequestController.class).getRequest(componentRequest.getId())).withSelfRel()));
+        pages.forEach(componentRequest -> componentRequest.set_links(linkTo(methodOn(ComRequestController.class).getRequest(componentRequest.getId())).withSelfRel()));
         return ResponseEntity.ok(new Resource<>(pages));
     }
 
