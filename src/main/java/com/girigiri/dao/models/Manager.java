@@ -23,6 +23,7 @@ import java.util.Date;
  * , he has responsibility to dispatch request to different engineer
  * <h1>ROLE_ACCOUNTANT</h1> who has access to {@link RepairHistory}, {@link Customer}
  * , he has responsibility to make bill
+ * <h1>ROLE_REPO_MANAGER</h1> who has access to {@link Component} and {@link ComponentRequest}
  */
 @Data
 @Entity
@@ -32,7 +33,8 @@ public class Manager {
     public static final String ROLE_USER = "ROLE_CUSTOMER_SERVICE";
     public static final String ROLE_ENGINEER = "ROLE_ENGINEER";
     public static final String ROLE_SCHEDULER = "ROLE_TASK_SCHEDULER";
-    public static final String ROLE_ACCOUNTANT = "ROLE_REPO_MANAGER";
+    public static final String ROLE_REPO_MANAGER = "ROLE_REPO_MANAGER";
+    public static final String ROLE_ACCOUNTANT = "ROLE_ACCOUNTANT";
     private @Id
     @GeneratedValue
     Long id;

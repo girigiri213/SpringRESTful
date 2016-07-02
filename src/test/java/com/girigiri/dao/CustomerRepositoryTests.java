@@ -13,6 +13,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -84,7 +86,29 @@ public class CustomerRepositoryTests {
     }
 
 
+
     @Test
+    @WithMockUser(username = "guojian", roles = {"ENGINEER"})
+    public void updateCustomerWithWrongRoleWillFail() throws Exception {
+        Customer customer = new Customer("420123********1617", "1304****139", "my new address", "my new contactName");
+        mockMvc.perform(put("/api" + "/customers/{id}", rst.getId())
+                .content(objToJson(customer))
+                .contentType(contentType))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void updateCustomerWithoutLoginWillFail() throws Exception {
+        Customer customer = new Customer("420123********1617", "1304****139", "my new address", "my new contactName");
+        mockMvc.perform(put("/api" + "/customers/{id}", rst.getId())
+                .content(objToJson(customer))
+                .contentType(contentType))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = {"CUSTOMER_SERVICE"})
     public void updateCustomer() throws Exception {
         Customer customer = new Customer("420123********1617", "1304****139", "my new address", "my new contactName");
         mockMvc.perform(put("/api" + "/customers/{id}", rst.getId())
@@ -95,7 +119,23 @@ public class CustomerRepositoryTests {
     }
 
     @Test
-    public void readAllCustomers() throws Exception {
+    @WithMockUser(username = "guojian", password = "password", roles = {"ENGINEER"})
+    public void readAllCustomersWithWrongRoleWillFail() throws Exception {
+        mockMvc.perform(get("/api" + "/customers"))
+                .andExpect(status().isForbidden());
+    }
+
+
+    @Test
+    @WithAnonymousUser
+    public void readAllCustomersWithoutLoginWillFail() throws Exception {
+        mockMvc.perform(get("/api" + "/customers"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = {"CUSTOMER_SERVICE"})
+    public void readAllCustomersWithRightRoleWillSuccess() throws Exception {
         mockMvc.perform(get("/api" + "/customers"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(contentType))
@@ -103,6 +143,21 @@ public class CustomerRepositoryTests {
     }
 
     @Test
+    @WithMockUser(username = "guojian", roles = {"ENGINEER"})
+    public void readOneCustomerWithWrongRoleWillFail() throws Exception {
+        mockMvc.perform(get("/api" + "/customers/{id}", rst.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void readOneCustomerWithoutLoginWillFail() throws Exception {
+        mockMvc.perform(get("/api" + "/customers/{id}", rst.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = {"CUSTOMER_SERVICE"})
     public void readOneCustomer() throws Exception {
         mockMvc.perform(get("/api" + "/customers/{id}", rst.getId()))
                 .andExpect(status().isOk())
@@ -116,6 +171,7 @@ public class CustomerRepositoryTests {
 
 
     @Test()
+    @WithMockUser(username = "guojian", roles = {"CUSTOMER_SERVICE"})
     public void createCustomerOutOfBoundary() {
         Customer customer = new Customer("420204********1617", "152*****345", "my other address", "my contactName");
         customer.setType(0);
@@ -141,7 +197,27 @@ public class CustomerRepositoryTests {
                 constraintViolations.iterator().next().getMessage());
     }
 
+
     @Test
+    @WithMockUser(username = "guojian", roles = {"ENGINEER"})
+    public void addCustomerWithWrongRoleWillFail() throws Exception {
+        mockMvc.perform(post("/api" + "/customers")
+                .content(objToJson(new Customer("420204********1617", "152*****345", "my other address", "my other contactName")))
+                .contentType(contentType))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void addCustomerWithoutLoginWillFail() throws Exception {
+        mockMvc.perform(post("/api" + "/customers")
+                .content(objToJson(new Customer("420204********1617", "152*****345", "my other address", "my other contactName")))
+                .contentType(contentType))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = {"CUSTOMER_SERVICE"})
     public void addCustomer() throws Exception {
         mockMvc.perform(post("/api" + "/customers")
                 .content(objToJson(new Customer("420204********1617", "152*****345", "my other address", "my other contactName")))
@@ -150,6 +226,7 @@ public class CustomerRepositoryTests {
     }
 
     @Test
+    @WithMockUser(username = "guojian", roles = {"CUSTOMER_SERVICE"})
     public void addCustomerOutOfBoundary() throws Exception {
         Customer customer = new Customer("420204********1617", "1528*****345", "my other address", "my contactName");
         customer.setType(1);
@@ -166,8 +243,23 @@ public class CustomerRepositoryTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @WithMockUser(username = "guojian", roles = {"ENGINEER"})
+    public void deleteCustomerWithWrongRoleWillFail() throws Exception {
+        mockMvc.perform(delete("/api/customers/{id}",rst.getId()))
+                .andExpect(status().isForbidden());
+    }
 
     @Test
+    @WithAnonymousUser
+    public void deleteCustomerWithoutLoginWillFail() throws Exception {
+        mockMvc.perform(delete("/api/customers/{id}",rst.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    @Test
+    @WithMockUser(username = "guojian", roles = {"CUSTOMER_SERVICE"})
     public void deleteCustomerWithRequestsShouldDeleteOtherRequestsAndDevices() throws Exception {
         mockMvc.perform(delete("/api/customers/{id}",rst.getId()))
                 .andExpect(status().isNoContent());

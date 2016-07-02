@@ -43,9 +43,7 @@ public class ComRequestController {
     @ResponseBody
     public ResponseEntity<?> getAllRequests() {
         Iterable<ComponentRequest> iterable = componentRequestRepository.findAll();
-        Iterator<ComponentRequest> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            ComponentRequest componentRequest = iterator.next();
+        for (ComponentRequest componentRequest : iterable) {
             componentRequest.set_link(linkTo(methodOn(ComRequestController.class).getRequest(componentRequest.getId())).withSelfRel());
         }
 

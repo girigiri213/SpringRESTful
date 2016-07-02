@@ -7,12 +7,12 @@ import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.services.ComponentRequestRepository;
 import com.girigiri.dao.services.ManagerRepository;
 import com.girigiri.dao.services.RepairHistoryRepository;
-import com.sun.corba.se.spi.logging.CORBALogDomains;
 import org.junit.*;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -81,12 +81,10 @@ public class RepairHistoryRepositoryTests {
         manager = managerRepository.save(new Manager("guojian", "root", Manager.ROLE_ENGINEER));
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(2);
-//        repairHistory.setRepairState(2);
         repairHistory.setManagerId(manager.getId());
         ComponentRequest request = new ComponentRequest("name", "serial number", 10);
         List<ComponentRequest> componentRequestList = new ArrayList<>();
         componentRequestList.add(request);
-//        repairHistory.setComponentRequests(componentRequestList);
         rep = repairHistoryRepository.save(repairHistory);
     }
 
@@ -130,6 +128,7 @@ public class RepairHistoryRepositoryTests {
 
 
     @Test
+    @WithMockUser(username = "guojian", roles = "ENGINEER")
     public void addHistoryIsNotAllowed() throws Exception {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(1);
@@ -141,18 +140,46 @@ public class RepairHistoryRepositoryTests {
     }
 
 
+
     @Test
-    public void getHistory() throws Exception {
+    @WithAnonymousUser
+    public void getHistoryWithoutLoginWillFail() throws Exception {
+        mockMvc.perform(get("/api/histories/{id}", rep.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    @Test
+    @WithMockUser(username = "guojian", roles = "CUSTOMER_SERVICE")
+    public void getHistoryWithWrongRoleWillFail() throws Exception {
+        mockMvc.perform(get("/api/histories/{id}", rep.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = "TASK_SCHEDULER")
+    public void getHistoryWithSchedulerRoleWillSuccess() throws Exception {
         MvcResult result = mockMvc.perform(get("/api/histories/{id}", rep.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.repairState", is(rep.getRepairState())))
                 .andExpect(jsonPath("$.repairState", is(rep.getDelayType())))
-//                .andExpect(jsonPath("$.managerId", is(manager.getId())))
                 .andReturn();
         System.err.println(result.getResponse().getContentAsString());
     }
 
     @Test
+    @WithMockUser(username = "guojian", roles = "ENGINEER")
+    public void getHistory() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/histories/{id}", rep.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.repairState", is(rep.getRepairState())))
+                .andExpect(jsonPath("$.repairState", is(rep.getDelayType())))
+                .andReturn();
+        System.err.println(result.getResponse().getContentAsString());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = "ENGINEER")
     public void removeHistoryWillNotRemoveComponentRequest() throws Exception {
         mockMvc.perform(delete("/api/histories/{id}", rep.getId()))
                 .andExpect(status().isNoContent());
@@ -160,29 +187,26 @@ public class RepairHistoryRepositoryTests {
                 .andExpect(status().isOk());
     }
 
-
-
     @Test
-    public void updateHistoryWithComponentRequestWillSuccess() throws Exception {
-        RepairHistory repairHistory = new RepairHistory();
-        repairHistory.setManagerId(manager.getId());
-        List<ComponentRequest> list = new ArrayList<>();
-        ComponentRequest componentRequest = new ComponentRequest("name", "new serial", 10);
-        list.add(componentRequest);
-        mockMvc.perform(put("/api/histories/{id}", rep.getId())
-                .contentType(contentType)
-                .content(objToJson(repairHistory)))
-                .andExpect(status().isNoContent());
-        MvcResult result = mockMvc.perform(get("/api/histories/{id}", rep.getId())
-                .contentType(contentType)
-                .content(objToJson(repairHistory)))
-                .andExpect(status().isOk()).andReturn();
-        System.err.println(result.getResponse().getContentAsString());
-//                .andExpect(jsonPath("$._embedded.componentRequests", hasSize(rep.getComponentRequests().size() + 1)));
+    @WithAnonymousUser
+    public void removeHistoryWithoutLoginWillFail() throws Exception {
+        mockMvc.perform(delete("/api/histories/{id}", rep.getId()))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    public void updateHistoryWithRightManagerWillSuccess() throws Exception {
+    @WithMockUser(username = "guojian", roles = "CUSTOMER_SERVICE")
+    public void removeHistoryWithWrongRoleWillFail() throws Exception {
+        mockMvc.perform(delete("/api/histories/{id}", rep.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+
+
+
+    @Test
+    @WithMockUser(username = "guojian", roles = "TASK_SCHEDULER")
+    public void updateHistoryWithRightManagerInSchedulerWillSuccess() throws Exception {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setManagerId(manager.getId());
         repairHistory.setRepairState(2);
@@ -200,6 +224,7 @@ public class RepairHistoryRepositoryTests {
 
 
     @Test
+    @WithMockUser(username = "guojian", roles = "TASK_SCHEDULER")
     public void updateHistoryWithWrongManagerWillFail() throws Exception {
         Manager manager = managerRepository.save(new Manager("sunpen", "sunpen", Manager.ROLE_USER));
         RepairHistory repairHistory = new RepairHistory();

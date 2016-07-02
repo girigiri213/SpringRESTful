@@ -14,6 +14,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolation;
@@ -29,6 +30,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * Custom RestController for {@link Request}
  */
 @RestController
+@RequestMapping(value = "/api/requests")
+@PreAuthorize("hasRole('CUSTOMER_SERVICE')")
 public class RequestController {
 
 
@@ -50,14 +53,12 @@ public class RequestController {
      * Get all requests in /api/requests
      * @return the {@link ResponseEntity} of all requests, <b>200 OK</b> is also returned if success
      */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getRequests() {
         Iterable<Request> iterable = requestRepository.findAll();
-        Iterator<Request> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            Request request = iterator.next();
+        for (Request request : iterable) {
             request.set_links(linkTo(methodOn(RequestController.class).getRequest(request.getId())).withSelfRel());
         }
         Resources<Request> resources = new Resources<>(iterable);
@@ -69,7 +70,7 @@ public class RequestController {
      * @param request the json posted, it will be converted to POJO
      * @return <b>201 Created</b> if created success
      */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity<?> save(@RequestBody Request request) {
@@ -89,7 +90,7 @@ public class RequestController {
      * @param page the number of current page, each page's size is 5
      * @return Current page of requests, and <b>200 OK</b> if success
      */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.GET, params = {"pages"})
+    @RequestMapping(method = RequestMethod.GET, params = {"pages"})
     public
     @ResponseBody
     ResponseEntity<?> getRequests(@RequestParam(value = "pages") int page) {
@@ -106,7 +107,7 @@ public class RequestController {
      * @return the request json and <b>200 OK</b> if request exists, <b>404 NOT FOUND</b> if request
      * doesn't exist.
      */
-    @RequestMapping(value = "/api/requests/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getRequest(@PathVariable Long id) {
@@ -123,7 +124,7 @@ public class RequestController {
      * @param size the size of query
      * @return Current page of requests, and <b>200 OK</b> if success
      */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.GET, params = {"size"})
+    @RequestMapping(method = RequestMethod.GET, params = {"size"})
     public
     @ResponseBody
     ResponseEntity<?> getRequestsBySize(@RequestParam(value = "size") int size) {
@@ -140,7 +141,7 @@ public class RequestController {
      * @param sort sort order
      * @return requests in json and <b>200 OK</b>, note that device json is included
      */
-    @RequestMapping(value = "/api/requests", method = RequestMethod.GET, params = {"pages", "sort"})
+    @RequestMapping(method = RequestMethod.GET, params = {"pages", "sort"})
     public
     @ResponseBody
     ResponseEntity<?> getRequests(@RequestParam(value = "pages") int page
@@ -156,7 +157,7 @@ public class RequestController {
      * @param id the request id
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/requests/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public
     @ResponseBody
     ResponseEntity<?> delete(@PathVariable Long id) {
@@ -173,7 +174,7 @@ public class RequestController {
      * @param request the updating request, formatted in json
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/requests/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public
     @ResponseBody
     ResponseEntity<?> update(@PathVariable Long id, @RequestBody Request request) {

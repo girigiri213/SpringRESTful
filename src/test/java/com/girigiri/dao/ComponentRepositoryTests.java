@@ -2,12 +2,20 @@ package com.girigiri.dao;
 
 import com.girigiri.SpringMvcApplication;
 import com.girigiri.dao.models.Component;
+import com.girigiri.dao.models.Manager;
 import com.girigiri.dao.services.ComponentRepository;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.web.FilterChainProxy;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -45,8 +53,8 @@ public class ComponentRepositoryTests {
     @Autowired
     private ComponentRepository componentRepository;
 
-    private long setupId;
-    private Component component;
+
+
 
     @BeforeClass
     public static void onCreate() {
@@ -59,23 +67,28 @@ public class ComponentRepositoryTests {
         this.mockMvc = webAppContextSetup(webApplicationContext)
                 .apply(springSecurity())
                 .build();
-        component = componentRepository.save(new Component("some component", 15, 20, 35));
-        setupId = component.getId();
     }
 
 
     @Test
-    public void getComponent() throws Exception {
-        assertEquals(3, component.getState());
-        mockMvc.perform(get("/api/components/{id}", setupId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(component.getName())))
-                .andExpect(jsonPath("$.price", is(component.getPrice())))
-                .andExpect(jsonPath("$.size", is(component.getSize())))
-                .andExpect(jsonPath("$.warningSize", is(component.getWarningSize())));
+    @WithMockUser(username = "guojian", roles = {"ENGINEER"})
+    public void addComponentWithWrongRoleWillFail() throws Exception {
+        Component component = new Component("new component needed", 20, 35, 20);
+        assertEquals(1, component.getState());
+        mockMvc.perform(post("/api/components").contentType(contentType).content(objToJson(component)))
+                .andExpect(status().isForbidden());
     }
 
     @Test
+    @WithAnonymousUser
+    public void addComponentWithoutLoginWillFail() throws Exception {
+        Component component = new Component("new component needed", 20, 35, 20);
+        assertEquals(1, component.getState());
+        mockMvc.perform(post("/api/components").contentType(contentType).content(objToJson(component)))
+                .andExpect(status().isUnauthorized());
+    }
+    @Test
+    @WithMockUser(username = "guojian", roles = {"REPO_MANAGER"})
     public void addComponent() throws Exception {
         Component component = new Component("new component needed", 20, 35, 20);
         assertEquals(1, component.getState());
@@ -85,7 +98,27 @@ public class ComponentRepositoryTests {
     }
 
 
+
     @Test
+    @WithAnonymousUser
+    public void updateComponentWithoutLoginWillFail() throws Exception {
+        Component component = new Component("new updated component", 45, 24, 35);
+        assertEquals(3, component.getState());
+        mockMvc.perform(put("/api/components/{id}", setupId).content(objToJson(component)).contentType(contentType))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = {"ENGINEER"})
+    public void updateComponentWithWrongRoleWillFail() throws Exception {
+        Component component = new Component("new updated component", 45, 24, 35);
+        assertEquals(3, component.getState());
+        mockMvc.perform(put("/api/components/{id}", setupId).content(objToJson(component)).contentType(contentType))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = {"REPO_MANAGER"})
     public void updateComponent() throws Exception {
         Component component = new Component("new updated component", 45, 24, 35);
         assertEquals(3, component.getState());
@@ -100,6 +133,7 @@ public class ComponentRepositoryTests {
     }
 
     @Test
+    @WithMockUser(username = "guojian", roles = {"REPO_MANAGER"})
     public void deleteComponent() throws Exception {
         mockMvc.perform(delete("/api/components/{id}", setupId))
                 .andExpect(status().isNoContent());
@@ -130,6 +164,7 @@ public class ComponentRepositoryTests {
     }
 
     @Test
+    @WithMockUser(username = "guojian", roles = {"REPO_MANAGER"})
     public void addInvalidComponent() throws Exception {
         Component component = new Component("some component", -10, 10, 30);
         mockMvc.perform(post("/api/components").contentType(contentType).content(objToJson(component)))
@@ -139,6 +174,6 @@ public class ComponentRepositoryTests {
 
     @After
     public void onDestroy() {
-        componentRepository.deleteAll();
+//        componentRepository.deleteAll();
     }
 }

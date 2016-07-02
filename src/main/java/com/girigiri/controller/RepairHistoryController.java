@@ -14,6 +14,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolation;
@@ -28,8 +29,11 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * Created by JianGuo on 6/30/16.
  * Rest Controller for {@link RepairHistoryRepository}
  * Because system will create a history when a request comes, so save a history directly is not allowed currently.
+ * This api will be accessible for {@link Manager#ROLE_ENGINEER} and {@link Manager#ROLE_SCHEDULER}
  */
 @RestController
+@RequestMapping(value = "/api/histories")
+@PreAuthorize("hasRole('ENGINEER') OR hasRole('ROLE_TASK_SCHEDULER')")
 public class RepairHistoryController {
     private final RepairHistoryRepository repairHistoryRepository;
 
@@ -47,14 +51,12 @@ public class RepairHistoryController {
      *
      * @return the {@link ResponseEntity} of all customers, <b>200 OK</b> is also returned if success
      */
-    @RequestMapping(value = "/api/histories", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getHistories() {
         Iterable<RepairHistory> iterable = repairHistoryRepository.findAll();
-        Iterator<RepairHistory> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            RepairHistory repairHistory = iterator.next();
+        for (RepairHistory repairHistory : iterable) {
             repairHistory.set_links(linkTo(methodOn(RepairHistoryController.class).getHistory(repairHistory.getId())).withSelfRel());
         }
         return ResponseEntity.ok(new Resources<>(iterable));
@@ -68,7 +70,7 @@ public class RepairHistoryController {
      * @param page the number of current page, each page's size is 5
      * @return Current page of histories, and <b>200 OK</b> if success
      */
-    @RequestMapping(value = "/api/histories", method = RequestMethod.GET, params = {"pages"})
+    @RequestMapping(method = RequestMethod.GET, params = {"pages"})
     public
     @ResponseBody
     ResponseEntity<?> getHistories(@RequestParam(value = "pages") int page) {
@@ -84,7 +86,7 @@ public class RepairHistoryController {
      * @param size the size of query
      * @return Current page of histories, and <b>200 OK</b> if success
      */
-    @RequestMapping(value = "/api/histories", method = RequestMethod.GET, params = {"size"})
+    @RequestMapping(method = RequestMethod.GET, params = {"size"})
     public
     @ResponseBody
     ResponseEntity<?> getHistoriesBySize(@RequestParam(value = "size") int size) {
@@ -103,7 +105,7 @@ public class RepairHistoryController {
      * @return the history json and <b>200 OK</b> if repairHistory exists, <b>404 NOT FOUND</b> if repairHistory
      * doesn't exist.
      */
-    @RequestMapping(value = "/api/histories/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getHistory(@PathVariable Long id) {
@@ -122,7 +124,7 @@ public class RepairHistoryController {
      * @param sort sort order
      * @return histories in json and <b>200 OK</b>
      */
-    @RequestMapping(value = "/api/histories", method = RequestMethod.GET, params = {"pages", "sort"})
+    @RequestMapping(method = RequestMethod.GET, params = {"pages", "sort"})
     public
     @ResponseBody
     ResponseEntity<?> getHistories(@RequestParam(value = "pages") int page
@@ -139,7 +141,7 @@ public class RepairHistoryController {
      * @param id the repairHistory id
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/histories/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public
     @ResponseBody
     ResponseEntity<?> delete(@PathVariable Long id) {
@@ -157,7 +159,7 @@ public class RepairHistoryController {
      * @param history the updating repairHistory, formatted in json
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/histories/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public
     @ResponseBody
     ResponseEntity<?> update(@PathVariable Long id, @RequestBody RepairHistory history) {
@@ -195,7 +197,6 @@ public class RepairHistoryController {
     private void compareAndUpdate(RepairHistory before, RepairHistory after) {
         before.setCheckHistory(after.getCheckHistory());
         before.setRepairState(after.getRepairState());
-//        before.setComponentRequests(after.getComponentRequests());
         before.setDelayType(after.getDelayType());
         before.setAssignTime(after.getAssignTime());
         before.setManPrice(after.getManPrice());

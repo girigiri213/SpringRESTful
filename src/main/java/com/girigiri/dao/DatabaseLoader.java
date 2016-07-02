@@ -10,7 +10,7 @@ import org.springframework.boot.CommandLineRunner;
  * database loader for init.
  */
 //Comment this if you don't want any initial data.
-@org.springframework.stereotype.Component
+//@org.springframework.stereotype.Component
 public class DatabaseLoader implements CommandLineRunner {
 
     @Autowired

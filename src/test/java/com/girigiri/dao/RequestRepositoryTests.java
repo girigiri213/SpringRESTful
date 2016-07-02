@@ -15,6 +15,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.security.access.method.P;
+import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -85,7 +88,23 @@ public class RequestRepositoryTests {
         request = requestRepository.save(tmp);
     }
 
+
     @Test
+    @WithAnonymousUser
+    public void getRequestWithoutLoginWillFail() throws Exception {
+        mockMvc.perform(get("/api/requests/{id}", request.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = {"ENGINEER"})
+    public void getRequestWithWrongRoleWillFail() throws Exception {
+        mockMvc.perform(get("/api/requests/{id}", request.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = "CUSTOMER_SERVICE")
     public void getRequest() throws Exception {
         mockMvc.perform(get("/api/requests/{id}", request.getId()))
                 .andExpect(status().isOk())
@@ -97,6 +116,36 @@ public class RequestRepositoryTests {
     }
 
     @Test
+    @WithMockUser(username = "guojian", roles = {"ENGINEER"})
+    public void addRequestWithWrongRoleWillFail() throws Exception {
+        Device device = new Device(1, "some error", 1);
+        Request tmp = new Request(155, "2016-7-7", 1);
+        tmp.setDevice(device);
+        tmp.setCusId(customer.getId());
+        String json = objToJson(tmp);
+        System.err.println("request json: " + json);
+        mockMvc.perform(post("/api/requests").content(json)
+                .contentType(contentType))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void addRequestWithoutLoginWillFail() throws Exception {
+        Device device = new Device(1, "some error", 1);
+        Request tmp = new Request(155, "2016-7-7", 1);
+        tmp.setDevice(device);
+        tmp.setCusId(customer.getId());
+        String json = objToJson(tmp);
+        System.err.println("request json: " + json);
+        mockMvc.perform(post("/api/requests").content(json)
+                .contentType(contentType))
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    @Test
+    @WithMockUser(username = "guojian", roles = "CUSTOMER_SERVICE")
     public void addRequestWillAddRepairHistoryAutomatically() throws Exception {
         Device device = new Device(1, "some error", 1);
         Request tmp = new Request(155, "2016-7-7", 1);
@@ -114,6 +163,7 @@ public class RequestRepositoryTests {
     }
 
     @Test
+    @WithMockUser(username = "guojian", roles = "CUSTOMER_SERVICE")
     public void addRequestWithInvalidCustomerWillFail() throws Exception {
         Request request = new Request(200, "2041-7-3", 2);
         request.setCusId((long)0);
@@ -142,6 +192,7 @@ public class RequestRepositoryTests {
 
 
     @Test
+    @WithMockUser(username = "guojian", roles = "CUSTOMER_SERVICE")
     public void addRequestOutOfBoundary() throws Exception {
         request.setState(4);
         mockMvc.perform(post("/api/requests").content(objToJson(request)).contentType(contentType))
@@ -155,7 +206,37 @@ public class RequestRepositoryTests {
                 .andExpect(status().isBadRequest());
     }
 
+
     @Test
+    @WithMockUser(username = "guojian", roles = "ENGINEER")
+    public void updateRequestWithWrongRoleWillFail() throws Exception {
+        Request request = new Request();
+        request.setState(3);
+        request.setCusId(customer.getId());
+        String json = objToJson(request);
+        System.err.println("put json" + json);
+        mockMvc.perform(put("/api/requests/{id}", this.request.getId())
+                .content(objToJson(request))
+                .contentType(contentType))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithAnonymousUser
+    public void updateRequestWithoutLoginWillFail() throws Exception {
+        Request request = new Request();
+        request.setState(3);
+        request.setCusId(customer.getId());
+        String json = objToJson(request);
+        System.err.println("put json" + json);
+        mockMvc.perform(put("/api/requests/{id}", this.request.getId())
+                .content(objToJson(request))
+                .contentType(contentType))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = "CUSTOMER_SERVICE")
     public void updateRequest() throws Exception {
         Request request = new Request();
         request.setState(3);
@@ -173,7 +254,16 @@ public class RequestRepositoryTests {
         System.err.println("response json " + result.getResponse().getContentAsString());
     }
 
+
     @Test
+    @WithMockUser(username = "guojian", roles = "ENGINEER")
+    public void deleteRequestWithWrongRoleWillFail() throws Exception {
+        mockMvc.perform(delete("/api/requests/{id}", request.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "guojian", roles = "CUSTOMER_SERVICE")
     public void deleteRequestWillDeleteDeviceButNotDeleteCustomer() throws Exception {
         mockMvc.perform(delete("/api/requests/{id}", request.getId()))
                 .andExpect(status().isNoContent());

@@ -14,6 +14,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.ConstraintViolation;
@@ -29,6 +30,8 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * Custom RestController for {@link com.girigiri.dao.models.Customer}
  */
 @RestController
+@PreAuthorize("hasRole('ROLE_CUSTOMER_SERVICE')")
+@RequestMapping(value = "/api/customers")
 public class CustomerController {
 
     private final CustomerRepository customerRepository;
@@ -46,14 +49,12 @@ public class CustomerController {
      * Get all customers in /api/customers
      * @return the {@link ResponseEntity} of all customers, <b>200 OK</b> is also returned if success
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getCustomers() {
         Iterable<Customer> iterable = customerRepository.findAll();
-        Iterator<Customer> iterator = iterable.iterator();
-        while (iterator.hasNext()) {
-            Customer customer = iterator.next();
+        for (Customer customer : iterable) {
             customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel());
         }
         Resources<Customer> resources = new Resources<>(iterable);
@@ -65,7 +66,7 @@ public class CustomerController {
      * @param customer the json posted, it will be converted to POJO
      * @return <b>201 Created</b> if created success
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public
     @ResponseBody
     ResponseEntity<?> save(@RequestBody Customer customer) {
@@ -80,7 +81,7 @@ public class CustomerController {
      * @param page the number of current page, each page's size is 5
      * @return Current page of customers, and <b>200 OK</b> if success
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.GET, params = {"pages"})
+    @RequestMapping(method = RequestMethod.GET, params = {"pages"})
     public
     @ResponseBody
     ResponseEntity<?> getCustomers(@RequestParam(value = "pages") int page) {
@@ -96,7 +97,7 @@ public class CustomerController {
      * @param size the size of query
      * @return Current page of customers, and <b>200 OK</b> if success
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.GET, params = {"size"})
+    @RequestMapping(method = RequestMethod.GET, params = {"size"})
     public
     @ResponseBody
     ResponseEntity<?> getCustomersBySize(@RequestParam(value = "size") int size) {
@@ -113,7 +114,7 @@ public class CustomerController {
      * @return the customer json and <b>200 OK</b> if customer exists, <b>404 NOT FOUND</b> if customer
      * doesn't exist.
      */
-    @RequestMapping(value = "/api/customers/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> getCustomer(@PathVariable Long id) {
@@ -130,7 +131,7 @@ public class CustomerController {
      * @param sort sort order
      * @return customers in json and <b>200 OK</b>
      */
-    @RequestMapping(value = "/api/customers", method = RequestMethod.GET, params = {"pages", "sort"})
+    @RequestMapping(method = RequestMethod.GET, params = {"pages", "sort"})
     public
     @ResponseBody
     ResponseEntity<?> getCustomers(@RequestParam(value = "pages") int page
@@ -146,7 +147,7 @@ public class CustomerController {
      * @param id the customer id
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/customers/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public
     @ResponseBody
     ResponseEntity<?> delete(@PathVariable Long id) {
@@ -164,7 +165,7 @@ public class CustomerController {
      * @param customer the updating customer, formatted in json
      * @return <b>204 No Content</b> if success
      */
-    @RequestMapping(value = "/api/customers/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public
     @ResponseBody
     ResponseEntity<?> update(@PathVariable Long id, @RequestBody Customer customer) {
