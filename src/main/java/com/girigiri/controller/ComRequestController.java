@@ -22,7 +22,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * Rest controller for {@link com.girigiri.dao.models.ComponentRequest}
  */
 @RestController
-@RequestMapping(value = "/api/com_requests")
+@RequestMapping(value = "/api/componentRequests")
 public class ComRequestController extends BaseController {
 
 

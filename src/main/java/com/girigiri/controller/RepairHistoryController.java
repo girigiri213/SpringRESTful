@@ -24,7 +24,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
  * Because system will create a history when a request comes, so save a history directly is not allowed currently.
  */
 @RestController
-@RequestMapping(value = "/api/histories")
+@RequestMapping(value = "/api/repairHistories")
 public class RepairHistoryController extends BaseController {
     private final RepairHistoryRepository repairHistoryRepository;
 
