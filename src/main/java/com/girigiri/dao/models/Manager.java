@@ -39,7 +39,7 @@ public class Manager {
 
     private String name;
 
-    private
+    private @JsonIgnore
     String password;
 
 
@@ -60,16 +60,6 @@ public class Manager {
         return created;
     }
 
-//    public void setCreated(Date created) {
-//        if (created == null) {
-//            return;
-//        }
-//        this.created = created;
-//    }
-//
-//    public void setUpdated(Date updated) {
-//        this.updated = updated;
-//    }
 
     public Long getUpdated() {
         return updated;
