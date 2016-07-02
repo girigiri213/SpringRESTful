@@ -29,10 +29,10 @@ import java.util.Date;
 @Table(name = "manager")
 public class Manager {
     public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
-    public static final String ROLE_USER = "ROLE_USER";
+    public static final String ROLE_USER = "ROLE_CUSTOMER_SERVICE";
     public static final String ROLE_ENGINEER = "ROLE_ENGINEER";
-    public static final String ROLE_SCHEDULER = "ROLE_SCHEDULER";
-    public static final String ROLE_ACCOUNTANT = "ROLE_ACCOUNTANT";
+    public static final String ROLE_SCHEDULER = "ROLE_TASK_SCHEDULER";
+    public static final String ROLE_ACCOUNTANT = "ROLE_REPO_MANAGER";
     private @Id
     @GeneratedValue
     Long id;
