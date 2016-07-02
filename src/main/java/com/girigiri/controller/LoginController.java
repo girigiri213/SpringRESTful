@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Created by JianGuo on 7/1/16.
+ * Rest Controller for login api, PUT, DELETE, UPDATE method are not allowed currently
  */
 @RestController
 @RequestMapping(value = "/api/login")
@@ -29,7 +30,7 @@ public class LoginController {
         String pwd = query.getPassword();
         String rawPwd = auth.getPassword();
         if(Manager.PASSWORD_ENCODER.matches(rawPwd, pwd)) {
-            return new ResponseEntity<>(null, HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(query, HttpStatus.ACCEPTED);
         } else {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
