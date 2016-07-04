@@ -187,7 +187,7 @@ public class CustomerController extends BaseController {
     }
 
 
-    @RequestMapping(value = "/searchCustomer", method = RequestMethod.GET, params = {"userId", "mobile", "contactName", "low", "high"})
+    @RequestMapping(value = "/searchCustomer", method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> search(@RequestParam(value = "userId", required = false) String userId,
@@ -195,13 +195,13 @@ public class CustomerController extends BaseController {
                              @RequestParam(value = "contactName", required = false) String contactName,
                              @RequestParam(value = "low", required = false) String low,
                              @RequestParam(value = "high", required = false) String high) {
-        if (userId.equals("")) userId = "%";
-        if (mobile.equals("")) mobile = "%";
-        if (contactName.equals("")) contactName = "%";
+        if (userId == null || userId.equals("")) userId = "%";
+        if (mobile == null || mobile.equals("")) mobile = "%";
+        if (contactName == null || contactName.equals("")) contactName = "%";
         long lowerBound = Long.MIN_VALUE;
         long upperBound = Long.MAX_VALUE;
-        if (!low.equals("")) lowerBound = Long.parseLong(low);
-        if (!high.equals("")) upperBound = Long.parseLong(high);
+        if ((low != null) && !low.equals("")) lowerBound = Long.parseLong(low);
+        if ((high != null) && !high.equals("")) upperBound = Long.parseLong(high);
         List<Customer> list = customerRepository.search(userId, mobile, contactName);
         long finalUpperBound = upperBound;
         long finalLowerBound = lowerBound;

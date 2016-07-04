@@ -20,6 +20,6 @@ public interface CustomerRepository extends PagingAndSortingRepository<Customer,
 
 
     @Transactional(readOnly = true)
-    @Query("FROM Customer L WHERE L.userId LIKE :userId AND L.mobile LIKE :mobile AND L.contactName LIKE :contactName")
+    @Query("FROM Customer L WHERE L.userId LIKE %:userId% AND L.mobile LIKE %:mobile% AND L.contactName LIKE %:contactName%")
     List<Customer> search(@Param("userId") String userId, @Param("mobile") String mobile, @Param("contactName") String contactName);
 }

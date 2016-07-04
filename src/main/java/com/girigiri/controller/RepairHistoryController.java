@@ -161,20 +161,20 @@ public class RepairHistoryController extends BaseController {
         return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     }
 
-    @RequestMapping(value = "/searchHistories", method = RequestMethod.GET, params = {"engineer", "low", "high"})
+    @RequestMapping(value = "/searchHistories", method = RequestMethod.GET)
     public
     @ResponseBody
-    ResponseEntity<?> search(@RequestParam("engineer") String name,
-                             @RequestParam("low") String low,
-                             @RequestParam("high") String high) {
+    ResponseEntity<?> search(@RequestParam(value = "engineer", required = false) String name,
+                             @RequestParam(value = "low", required = false) String low,
+                             @RequestParam(value = "high", required = false) String high) {
         long lowerBound = Long.MIN_VALUE;
         long upperBound = Long.MAX_VALUE;
-        if (!low.equals("")) lowerBound = Long.parseLong(low);
-        if (!high.equals("")) upperBound = Long.parseLong(high);
+        if (low != null && !low.equals("")) lowerBound = Long.parseLong(low);
+        if (high != null && !high.equals("")) upperBound = Long.parseLong(high);
         long finalUpperBound = upperBound;
         long finalLowerBound = lowerBound;
         List<RepairHistory> list = new ArrayList<>();
-        if (name.equals("")) {
+        if (name == null || name.equals("")) {
             list = (List<RepairHistory>) repairHistoryRepository.findAll();
         } else {
             Manager manager = managerRepository.findOneByName(name);

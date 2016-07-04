@@ -14,6 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -148,6 +152,22 @@ public class ComRequestController extends BaseController {
         ComponentRequest rst = componentRequestRepository.save(componentRequest);
         rst.set_links(linkTo(methodOn(ComRequestController.class).getRequest(rst.getId())).withSelfRel());
         return new ResponseEntity<>(new Resource<>(rst), HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/searchRequest", method = RequestMethod.GET, params = {"name", "low", "high"})
+    @ResponseBody
+    public ResponseEntity<?> search(@RequestParam("name") String name, @RequestParam("low") String low, @RequestParam("high") String high) {
+        List<ComponentRequest> list = componentRequestRepository.findByName(name);
+        long lowerBound = Long.MIN_VALUE;
+        long upperBound = Long.MAX_VALUE;
+        if (!low.equals("")) lowerBound = Long.parseLong(low);
+        if (!high.equals("")) upperBound = Long.parseLong(high);
+        long finalUpperBound = upperBound;
+        long finalLowerBound = lowerBound;
+        List<ComponentRequest> rst = list.stream().filter(componentRequest -> componentRequest.getCreated() >= finalLowerBound && componentRequest.getCreated() <= finalUpperBound)
+                .collect(toList());
+        rst.forEach(componentRequest -> componentRequest.set_links(linkTo(methodOn(ComRequestController.class).getRequest(componentRequest.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resources<>(rst));
     }
 
     private void compareAndUpdate(ComponentRequest before, ComponentRequest after) {

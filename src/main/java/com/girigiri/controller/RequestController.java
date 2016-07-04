@@ -196,15 +196,15 @@ public class RequestController extends BaseController {
         List<Request> list;
         long lowerBound = Long.MIN_VALUE;
         long upperBound = Long.MAX_VALUE;
-        if (!low.equals("")) lowerBound = Long.parseLong(low);
-        if (!high.equals("")) upperBound = Long.parseLong(high);
+        if (low != null && !low.equals("")) lowerBound = Long.parseLong(low);
+        if (high != null && !high.equals("")) upperBound = Long.parseLong(high);
         long finalUpperBound = upperBound;
         long finalLowerBound = lowerBound;
 
-        if (!cusId.equals("")) {
-            list = requestRepository.findByCusId(Long.parseLong(cusId));
-        } else {
+        if (cusId == null || cusId.equals("")) {
             list = (List<Request>) requestRepository.findAll();
+        } else {
+            list = requestRepository.findByCusId(Long.parseLong(cusId));
         }
         List<Request> rst = list.stream().filter(request -> (request.getCreated() <= finalUpperBound && request.getCreated() >= finalLowerBound))
                 .collect(toList());
