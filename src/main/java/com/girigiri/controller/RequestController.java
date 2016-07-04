@@ -227,7 +227,6 @@ public class RequestController extends BaseController {
 
 
     private void compareAndUpdate(Request before, Request after) {
-        //// FIXME: 7/5/16 Appearance in device
         before.setDevice(after.getDevice());
         before.setState(after.getState());
         before.setPredictPrice(after.getPredictPrice());
@@ -235,6 +234,7 @@ public class RequestController extends BaseController {
         before.setPredictTime(after.getPredictTime());
         before.setRepairHistory(after.getRepairHistory());
         before.setTime(after.getTime());
+        before.setCusId(after.getCusId());
     }
 
 

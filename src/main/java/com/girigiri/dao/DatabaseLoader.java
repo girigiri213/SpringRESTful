@@ -63,6 +63,7 @@ public class DatabaseLoader implements CommandLineRunner {
         Device device2 = new Device(1, "some other error", 2);
         request2.setDevice(device2);
         customerRepository.save(customer1);
+        customerRepository.save(new Customer("330302199511039414", "15171508722", "fake address", "sunpen"));
         requestRepository.save(request2);
         Request request1 = new Request(200, "2014-13-2", 2);
         Device device1 = new Device(1, "some new error", 2);
@@ -75,6 +76,8 @@ public class DatabaseLoader implements CommandLineRunner {
         managerRepository.save(new Manager("ladrift", "213", Manager.ROLE_USER));
         managerRepository.save(new Manager("sunpen", "213", Manager.ROLE_SUPERUSER));
         managerRepository.save(new Manager("ted", "213", Manager.ROLE_ENGINEER));
+        managerRepository.save(new Manager("eng", "213", Manager.ROLE_ENGINEER));
+        managerRepository.save(new Manager("ineer", "213", Manager.ROLE_ENGINEER));
         managerRepository.save(new Manager("whr", "213", Manager.ROLE_SCHEDULER));
         managerRepository.save(new Manager("guojian", "213", Manager.ROLE_ACCOUNTANT));
     }
