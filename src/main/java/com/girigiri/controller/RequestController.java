@@ -187,7 +187,7 @@ public class RequestController extends BaseController {
     }
 
 
-    @RequestMapping(value = "/searchRequest", method = RequestMethod.GET, params = {"cusId", "low", "high"})
+    @RequestMapping(value = "/searchRequest", method = RequestMethod.GET)
     public
     @ResponseBody
     ResponseEntity<?> search(@RequestParam(value = "cusId", required = false) String cusId,

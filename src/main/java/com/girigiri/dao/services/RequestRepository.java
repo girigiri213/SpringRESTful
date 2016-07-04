@@ -22,11 +22,6 @@ public interface RequestRepository extends PagingAndSortingRepository<Request, L
     List<Request> removeByCusId(long cus_id);
 
 
-    @Transactional
-    @Query("FROM Request L WHERE L.id = :id AND L.cusId = :cusId")
-    List<Request> search(@Param("id") long id, @Param("cusId") long cusId);
-
-
     List<Request> findByCusId(long cusId);
 
 
