@@ -32,6 +32,7 @@ public class Manager {
     public static final String ROLE_ENGINEER = "ROLE_ENGINEER";
     public static final String ROLE_SCHEDULER = "ROLE_TASK_SCHEDULER";
     public static final String ROLE_ACCOUNTANT = "ROLE_REPO_MANAGER";
+    public static final String ROLE_SUPERUSER = "ROLE_SUPERUSER";
     private @Id
     @GeneratedValue
     Long id;

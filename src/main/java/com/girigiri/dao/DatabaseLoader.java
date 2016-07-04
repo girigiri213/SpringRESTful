@@ -29,6 +29,9 @@ public class DatabaseLoader implements CommandLineRunner {
     private ComponentRequestRepository componentRequestRepository;
 
     @Autowired
+    private ComponentRepository componentRepository;
+
+    @Autowired
     private ManagerRepository managerRepository;
 
     @Override
@@ -64,11 +67,14 @@ public class DatabaseLoader implements CommandLineRunner {
         Device device1 = new Device(1, "some new error", 2);
         request1.setDevice(device1);
         requestRepository.save(request1);
-        Manager manager = new Manager("guojian", "password", Manager.ROLE_USER);
 
-        managerRepository.save(manager);
-        managerRepository.save(new Manager("ladrift", "hellodad", Manager.ROLE_USER));
-        managerRepository.save(new Manager("sunpen", "hellodad", Manager.ROLE_ENGINEER));
-        managerRepository.save(new Manager("ted", "hellodad", Manager.ROLE_ENGINEER));
+        Component com = new Component("NVIDIA GPU","GTX 1080", 3999, 20, 5);
+        componentRepository.save(com);
+
+        managerRepository.save(new Manager("ladrift", "213", Manager.ROLE_USER));
+        managerRepository.save(new Manager("sunpen", "213", Manager.ROLE_SUPERUSER));
+        managerRepository.save(new Manager("ted", "213", Manager.ROLE_ENGINEER));
+        managerRepository.save(new Manager("whr", "213", Manager.ROLE_SCHEDULER));
+        managerRepository.save(new Manager("guojian", "213", Manager.ROLE_ACCOUNTANT));
     }
 }
