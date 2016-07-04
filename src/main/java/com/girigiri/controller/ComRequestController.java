@@ -154,14 +154,21 @@ public class ComRequestController extends BaseController {
         return new ResponseEntity<>(new Resource<>(rst), HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/searchRequest", method = RequestMethod.GET, params = {"name", "low", "high"})
+    @RequestMapping(value = "/searchRequest", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<?> search(@RequestParam("name") String name, @RequestParam("low") String low, @RequestParam("high") String high) {
-        List<ComponentRequest> list = componentRequestRepository.findByName(name);
+    public ResponseEntity<?> search(@RequestParam(value = "name",required = false) String name,
+                                    @RequestParam(value = "low", required = false) String low,
+                                    @RequestParam(value = "high", required = false) String high) {
+        List<ComponentRequest> list;
+        if (name == null || name.equals("")) {
+            list = (List<ComponentRequest>) componentRequestRepository.findAll();
+        } else {
+            list = componentRequestRepository.findByName(name);
+        }
         long lowerBound = Long.MIN_VALUE;
         long upperBound = Long.MAX_VALUE;
-        if (!low.equals("")) lowerBound = Long.parseLong(low);
-        if (!high.equals("")) upperBound = Long.parseLong(high);
+        if (low != null && !low.equals("")) lowerBound = Long.parseLong(low);
+        if (high != null && !high.equals("")) upperBound = Long.parseLong(high);
         long finalUpperBound = upperBound;
         long finalLowerBound = lowerBound;
         List<ComponentRequest> rst = list.stream().filter(componentRequest -> componentRequest.getCreated() >= finalLowerBound && componentRequest.getCreated() <= finalUpperBound)

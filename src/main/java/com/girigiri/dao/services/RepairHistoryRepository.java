@@ -24,6 +24,7 @@ public interface RepairHistoryRepository extends PagingAndSortingRepository<Repa
     List<RepairHistory> findByRepairState(@Param("state") int repairState);
 
     @Transactional
+    @RestResource(exported = false)
     List<RepairHistory> findByManagerId(long managerId);
 
 }
