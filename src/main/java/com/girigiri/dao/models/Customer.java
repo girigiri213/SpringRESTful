@@ -93,7 +93,9 @@ public class Customer {
 
 
 
-    public Customer() {}
+    public Customer() {
+        setType(1);
+    }
 
 
     public Customer(String userId, String mobile, String address, String contactName) {

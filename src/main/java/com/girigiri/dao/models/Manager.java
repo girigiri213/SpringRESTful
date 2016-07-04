@@ -25,7 +25,7 @@ import java.util.Date;
  */
 @Data
 @Entity
-@Table(name = "manager")
+@Table(name = "manager", uniqueConstraints = @UniqueConstraint(columnNames = {"name"}))
 public class Manager {
     public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
     public static final String ROLE_USER = "ROLE_CUSTOMER_SERVICE";

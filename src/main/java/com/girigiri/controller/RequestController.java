@@ -5,6 +5,7 @@ import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.models.Request;
 import com.girigiri.dao.services.CustomerRepository;
 import com.girigiri.dao.services.RequestRepository;
+import com.mysql.fabric.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -40,9 +44,9 @@ public class RequestController extends BaseController {
     }
 
 
-
     /**
      * Get all requests in /api/requests
+     *
      * @return the {@link ResponseEntity} of all requests, <b>200 OK</b> is also returned if success
      */
     @RequestMapping(method = RequestMethod.GET)
@@ -59,6 +63,7 @@ public class RequestController extends BaseController {
 
     /**
      * Return all requests in pages
+     *
      * @param page the number of current page, each page's size is {@link BaseController#DEFAULT_PAGE_SIZE},
      *             note that page starts from <b>0</b>, not <b>1</b>
      * @return Current page of requests, and <b>200 OK</b> if success
@@ -86,6 +91,7 @@ public class RequestController extends BaseController {
 
     /**
      * Get requests in current page and in given sort order
+     *
      * @param page the current page, default page's size is {@link BaseController#DEFAULT_PAGE_SIZE}
      * @param sort sort order
      * @return requests in json and <b>200 OK</b>, note that device json is included
@@ -108,6 +114,7 @@ public class RequestController extends BaseController {
 
     /**
      * Get one request by id
+     *
      * @param id the request id
      * @return the request json and <b>200 OK</b> if request exists, <b>404 NOT FOUND</b> if request
      * doesn't exist.
@@ -124,6 +131,7 @@ public class RequestController extends BaseController {
 
     /**
      * Save a request using {@link RequestMethod}.POST method
+     *
      * @param request the json posted, it will be converted to POJO
      * @return <b>201 Created</b> if created success
      */
@@ -144,6 +152,7 @@ public class RequestController extends BaseController {
 
     /**
      * Delete a customer in {@link RequestMethod}.DELETE method
+     *
      * @param id the request id
      * @return <b>204 No Content</b> if success
      */
@@ -160,7 +169,8 @@ public class RequestController extends BaseController {
     /**
      * Update a existed request using {@link RequestMethod}.PUT method,
      * PATCH method is not allowed here currently
-     * @param id the customer id
+     *
+     * @param id      the customer id
      * @param request the updating request, formatted in json
      * @return <b>204 No Content</b> if success
      */
@@ -177,6 +187,32 @@ public class RequestController extends BaseController {
     }
 
 
+    @RequestMapping(value = "/searchRequest", method = RequestMethod.GET, params = {"cusId", "low", "high"})
+    public
+    @ResponseBody
+    ResponseEntity<?> search(@RequestParam(value = "cusId", required = false) String cusId,
+                             @RequestParam(value = "low", required = false) String low,
+                             @RequestParam(value = "high", required = false) String high) {
+        List<Request> list;
+        long lowerBound = Long.MIN_VALUE;
+        long upperBound = Long.MAX_VALUE;
+        if (low != null && !low.equals("")) lowerBound = Long.parseLong(low);
+        if (high != null && !high.equals("")) upperBound = Long.parseLong(high);
+        long finalUpperBound = upperBound;
+        long finalLowerBound = lowerBound;
+
+        if (cusId == null || cusId.equals("")) {
+            list = (List<Request>) requestRepository.findAll();
+        } else {
+            list = requestRepository.findByCusId(Long.parseLong(cusId));
+        }
+        List<Request> rst = list.stream().filter(request -> (request.getCreated() <= finalUpperBound && request.getCreated() >= finalLowerBound))
+                .collect(toList());
+        rst.forEach(request -> request.set_links(linkTo(methodOn(RequestController.class).getRequest(request.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resources<>(rst));
+    }
+
+
     private void validateRequest(long id) {
         if (!requestRepository.exists(id)) {
             throw new RestUtils.RequestNotFoundException(id);
@@ -190,9 +226,6 @@ public class RequestController extends BaseController {
     }
 
 
-
-
-
     private void compareAndUpdate(Request before, Request after) {
         before.setDevice(after.getDevice());
         before.setState(after.getState());
@@ -201,11 +234,6 @@ public class RequestController extends BaseController {
         before.setRepairHistory(after.getRepairHistory());
         before.setTime(after.getTime());
     }
-
-
-
-
-
 
 
 }

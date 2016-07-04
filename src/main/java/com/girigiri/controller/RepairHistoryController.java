@@ -1,6 +1,7 @@
 package com.girigiri.controller;
 
 import com.girigiri.controller.utils.RestUtils;
+import com.girigiri.dao.models.Customer;
 import com.girigiri.dao.models.Manager;
 import com.girigiri.dao.models.RepairHistory;
 import com.girigiri.dao.services.ManagerRepository;
@@ -15,6 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -52,7 +57,6 @@ public class RepairHistoryController extends BaseController {
         }
         return ResponseEntity.ok(new Resources<>(iterable));
     }
-
 
 
     /**
@@ -157,6 +161,39 @@ public class RepairHistoryController extends BaseController {
         return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     }
 
+    @RequestMapping(value = "/searchHistories", method = RequestMethod.GET)
+    public
+    @ResponseBody
+    ResponseEntity<?> search(@RequestParam(value = "engineer", required = false) String name,
+                             @RequestParam(value = "low", required = false) String low,
+                             @RequestParam(value = "high", required = false) String high) {
+        long lowerBound = Long.MIN_VALUE;
+        long upperBound = Long.MAX_VALUE;
+        if (low != null && !low.equals("")) lowerBound = Long.parseLong(low);
+        if (high != null && !high.equals("")) upperBound = Long.parseLong(high);
+        long finalUpperBound = upperBound;
+        long finalLowerBound = lowerBound;
+        List<RepairHistory> list = new ArrayList<>();
+        if (name == null || name.equals("")) {
+            list = (List<RepairHistory>) repairHistoryRepository.findAll();
+        } else {
+            Manager manager = managerRepository.findOneByName(name);
+            if (manager == null) {
+                return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+            } else {
+                if (containsCorrectRole(manager.getRoles())) {
+                    list = repairHistoryRepository.findByManagerId(manager.getId());
+                } else {
+                    return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+                }
+            }
+        }
+        List<RepairHistory> rst = list.stream().filter(history -> (history.getCreated() <= finalUpperBound && history.getCreated() >= finalLowerBound))
+                .collect(toList());
+        rst.forEach(history -> history.set_links(linkTo(methodOn(RepairHistoryController.class).getHistory(history.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resources<>(rst));
+    }
+
 
     private void validateHistoryByManager(RepairHistory history) {
         if (!managerRepository.exists(history.getManagerId())) {
@@ -197,7 +234,6 @@ public class RepairHistoryController extends BaseController {
             throw new RestUtils.HistoryNotFoundException(id);
         }
     }
-
 
 
 }
