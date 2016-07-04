@@ -40,7 +40,6 @@ public class ConfirmController extends BaseController {
     }
 
 
-    // TODO: 6/26/16 regroup customer and device to a confirm POJO
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public void getConfirm(HttpServletResponse response, @PathVariable Long id) throws IOException {
         Request request = requestRepository.findOne(id);
