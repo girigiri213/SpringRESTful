@@ -145,8 +145,9 @@ public class ComRequestController extends BaseController {
     @ResponseBody
     public ResponseEntity<?> save(@RequestBody ComponentRequest componentRequest) {
         checkWithHistoryId(componentRequest.getHistory());
-        componentRequestRepository.save(componentRequest);
-        return new ResponseEntity<>(null, HttpStatus.CREATED);
+        ComponentRequest rst = componentRequestRepository.save(componentRequest);
+        rst.set_links(linkTo(methodOn(ComRequestController.class).getRequest(rst.getId())).withSelfRel());
+        return new ResponseEntity<>(new Resource<>(rst), HttpStatus.CREATED);
     }
 
     private void compareAndUpdate(ComponentRequest before, ComponentRequest after) {

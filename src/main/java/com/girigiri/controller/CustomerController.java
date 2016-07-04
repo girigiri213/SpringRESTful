@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -63,8 +65,9 @@ public class CustomerController extends BaseController {
     public
     @ResponseBody
     ResponseEntity<?> save(@RequestBody Customer customer) {
-        Resource<Customer> resources = new Resource<>(customerRepository.save(customer));
-        resources.add(linkTo(methodOn(CustomerController.class).getCustomers()).withSelfRel());
+        Customer rst = customerRepository.save(customer);
+        rst.set_links(linkTo(methodOn(CustomerController.class).getCustomer(rst.getId())).withSelfRel());
+        Resource<Customer> resources = new Resource<>(rst);
         return new ResponseEntity<>(resources, HttpStatus.CREATED);
     }
 
@@ -180,6 +183,16 @@ public class CustomerController extends BaseController {
         compareAndUpdate(rst, customer);
         customerRepository.save(rst);
         return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+    }
+
+
+    @RequestMapping(value = "/search", method = RequestMethod.GET, params = {"userId", "mobile", "contactName"})
+    public @ResponseBody ResponseEntity<?> search(@RequestParam("userId") String userId,
+                                                  @RequestParam("mobile") String mobile,
+                                                  @RequestParam("contactName") String contactName) {
+        List<Customer> list = customerRepository.search(userId, mobile, contactName);
+        list.forEach(customer -> customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resources<>(list));
     }
 
 
