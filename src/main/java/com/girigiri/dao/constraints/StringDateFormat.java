@@ -15,6 +15,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = DateValidator.class)
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface StringDateFormat {
     String message() default "String is not in date format";
     Class<?>[] groups() default {};

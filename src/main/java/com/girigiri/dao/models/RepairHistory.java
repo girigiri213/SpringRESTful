@@ -1,7 +1,6 @@
 package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.girigiri.dao.constraints.StringDateFormat;
 import lombok.Data;
 import org.springframework.hateoas.Link;
 
@@ -24,15 +23,13 @@ public class RepairHistory {
 
     private String name;
 
-    @StringDateFormat
-    private String assignTime;
+    private Long assignTime;
 
     private String checkHistory;
 
     private String repairHistory;
 
-    @StringDateFormat
-    private String repairTime;
+    private Long repairTime;
 
     private String workforce;
 
@@ -96,11 +93,11 @@ public class RepairHistory {
         this.name = name;
     }
 
-    public String getAssignTime() {
+    public Long getAssignTime() {
         return assignTime;
     }
 
-    public void setAssignTime(String assignTime) {
+    public void setAssignTime(Long assignTime) {
         this.assignTime = assignTime;
     }
 
@@ -120,11 +117,11 @@ public class RepairHistory {
         this.repairHistory = repairHistory;
     }
 
-    public String getRepairTime() {
+    public Long getRepairTime() {
         return repairTime;
     }
 
-    public void setRepairTime(String repairTime) {
+    public void setRepairTime(Long repairTime) {
         this.repairTime = repairTime;
     }
 
