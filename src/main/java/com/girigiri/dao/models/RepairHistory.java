@@ -21,7 +21,7 @@ public class RepairHistory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String name;
+//    private String name;
 
     private Long assignTime;
 
@@ -85,13 +85,13 @@ public class RepairHistory {
         return id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+//    public String getName() {
+//        return name;
+//    }
+//
+//    public void setName(String name) {
+//        this.name = name;
+//    }
 
     public Long getAssignTime() {
         return assignTime;
@@ -224,7 +224,6 @@ public class RepairHistory {
         if (repairState != that.repairState) return false;
         if (delayType != that.delayType) return false;
         if (!id.equals(that.id)) return false;
-        if (name != null ? !name.equals(that.name) : that.name != null) return false;
         if (assignTime != null ? !assignTime.equals(that.assignTime) : that.assignTime != null) return false;
         if (checkHistory != null ? !checkHistory.equals(that.checkHistory) : that.checkHistory != null) return false;
         if (repairHistory != null ? !repairHistory.equals(that.repairHistory) : that.repairHistory != null)
@@ -247,7 +246,6 @@ public class RepairHistory {
     @Override
     public int hashCode() {
         int result = 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (assignTime != null ? assignTime.hashCode() : 0);
         result = 31 * result + (checkHistory != null ? checkHistory.hashCode() : 0);
         result = 31 * result + (repairHistory != null ? repairHistory.hashCode() : 0);
@@ -266,7 +264,6 @@ public class RepairHistory {
     public String toString() {
         return "RepairHistory{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
                 ", time='" + assignTime + '\'' +
                 ", checkHistory='" + checkHistory + '\'' +
                 ", repairHistory='" + repairHistory + '\'' +

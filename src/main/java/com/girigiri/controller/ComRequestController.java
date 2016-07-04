@@ -65,6 +65,7 @@ public class ComRequestController extends BaseController {
 
     /**
      * Return all componentRequests with particular size
+     *
      * @param page the page of query, note that page starts from <b>0</b>, not <b>1</b>
      * @param size the size of query
      * @param sort the sort column, id by default
@@ -80,6 +81,7 @@ public class ComRequestController extends BaseController {
 
     /**
      * Return all componentRequests with particular size
+     *
      * @param page the page of query, note that page starts from <b>0</b>, not <b>1</b>
      * @return Current page of componentRequests, and <b>200 OK</b> if success
      */
@@ -93,6 +95,7 @@ public class ComRequestController extends BaseController {
 
     /**
      * Return all componentRequests with particular size
+     *
      * @param page the page of query, note that page starts from <b>0</b>, not <b>1</b>
      * @param sort the sort column, id by default
      * @return Current page of componentRequests, and <b>200 OK</b> if success
@@ -128,7 +131,9 @@ public class ComRequestController extends BaseController {
     @ResponseBody
     ResponseEntity<?> update(@PathVariable Long id, @RequestBody ComponentRequest componentRequest) {
         validateId(id);
-        checkWithHistoryId(componentRequest.getHistory());
+        if (componentRequest.getHistory() > 0) {
+            checkWithHistoryId(componentRequest.getHistory());
+        }
         ComponentRequest rst = componentRequestRepository.findOne(id);
         compareAndUpdate(rst, componentRequest);
         componentRequestRepository.save(rst);
@@ -148,7 +153,9 @@ public class ComRequestController extends BaseController {
     @RequestMapping(value = "", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<?> save(@RequestBody ComponentRequest componentRequest) {
-        checkWithHistoryId(componentRequest.getHistory());
+        if (componentRequest.getHistory() > 0) {
+            checkWithHistoryId(componentRequest.getHistory());
+        }
         ComponentRequest rst = componentRequestRepository.save(componentRequest);
         rst.set_links(linkTo(methodOn(ComRequestController.class).getRequest(rst.getId())).withSelfRel());
         return new ResponseEntity<>(new Resource<>(rst), HttpStatus.CREATED);
@@ -156,7 +163,7 @@ public class ComRequestController extends BaseController {
 
     @RequestMapping(value = "/searchRequest", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<?> search(@RequestParam(value = "name",required = false) String name,
+    public ResponseEntity<?> search(@RequestParam(value = "name", required = false) String name,
                                     @RequestParam(value = "low", required = false) String low,
                                     @RequestParam(value = "high", required = false) String high) {
         List<ComponentRequest> list;
@@ -205,8 +212,6 @@ public class ComRequestController extends BaseController {
             throw new RestUtils.ComponentRequestNotFoundException(id);
         }
     }
-
-
 
 
 }

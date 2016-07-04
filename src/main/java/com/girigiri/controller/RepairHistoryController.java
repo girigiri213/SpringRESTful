@@ -224,9 +224,12 @@ public class RepairHistoryController extends BaseController {
         before.setDelayType(after.getDelayType());
         before.setAssignTime(after.getAssignTime());
         before.setManPrice(after.getManPrice());
-        before.setRepairState(after.getRepairState());
         before.setManagerId(after.getManagerId());
         before.setMaterialPrice(after.getMaterialPrice());
+        before.setPromise(after.getPromise());
+        before.setRepairHistory(after.getRepairHistory());
+        before.setWarning(after.getWarning());
+        before.setWorkforce(after.getWorkforce());
     }
 
 
