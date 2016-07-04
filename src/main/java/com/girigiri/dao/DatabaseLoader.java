@@ -68,5 +68,7 @@ public class DatabaseLoader implements CommandLineRunner {
 
         managerRepository.save(manager);
         managerRepository.save(new Manager("ladrift", "hellodad", Manager.ROLE_USER));
+        managerRepository.save(new Manager("sunpen", "hellodad", Manager.ROLE_ENGINEER));
+        managerRepository.save(new Manager("ted", "hellodad", Manager.ROLE_ENGINEER));
     }
 }
