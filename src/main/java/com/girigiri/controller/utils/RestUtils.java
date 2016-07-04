@@ -85,4 +85,10 @@ public class RestUtils {
         }
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public static class ComponentNotFoundException extends RuntimeException {
+        public ComponentNotFoundException(long id) {
+            super("Could not find component id " + id);
+        }
+    }
 }

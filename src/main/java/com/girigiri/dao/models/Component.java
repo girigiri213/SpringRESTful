@@ -2,6 +2,8 @@ package com.girigiri.dao.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.Links;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -64,6 +66,16 @@ public class Component {
     @JsonIgnore
     private Long version;
 
+
+    private Link _links;
+
+    public Link get_links() {
+        return _links;
+    }
+
+    public void set_links(Link _links) {
+        this._links = _links;
+    }
 
     public String getName() {
         return name;
