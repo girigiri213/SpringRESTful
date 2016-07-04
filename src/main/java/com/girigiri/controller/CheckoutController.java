@@ -45,8 +45,6 @@ public class CheckoutController {
         List<ComponentRequest> list = componentRequestRepository.findByHistory(request.getRepairHistory().getId());
         HSSFWorkbook workbook = PoiUtil.saveCheckoutBill(request, customer, list);
         response.setContentType("application/vnd.ms-excel; charset=utf-8");
-        response.setHeader("Content-Disposition",
-                "attachment; filename=" + "结算清单.xls");
         workbook.write(response.getOutputStream()); // Write workbook to response.
         workbook.close();
     }

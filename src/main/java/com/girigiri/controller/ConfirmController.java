@@ -46,8 +46,6 @@ public class ConfirmController extends BaseController {
         Customer customer = customerRepository.findOne(request.getCusId());
         HSSFWorkbook workbook = PoiUtil.saveConfirmExcel(request, customer);
         response.setContentType("application/vnd.ms-excel; charset=utf-8");
-        response.setHeader("Content-Disposition",
-                "attachment; filename=" + "客户确认单.xls");
         workbook.write(response.getOutputStream()); // Write workbook to response.
         workbook.close();
     }
