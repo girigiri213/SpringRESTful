@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -205,10 +206,10 @@ public class RequestController extends BaseController {
         } else {
             list = (List<Request>) requestRepository.findAll();
         }
-        list.stream()
-                .filter(request -> (request.getCreated() <= finalUpperBound) && (request.getCreated() >= finalLowerBound))
-                .forEach(request -> request.set_links(linkTo(methodOn(RequestController.class).getRequest(request.getId())).withSelfRel()));
-        return ResponseEntity.ok(new Resources<>(list));
+        List<Request> rst = list.stream().filter(request -> (request.getCreated() <= finalUpperBound && request.getCreated() >= finalLowerBound))
+                .collect(toList());
+        rst.forEach(request -> request.set_links(linkTo(methodOn(RequestController.class).getRequest(request.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resources<>(rst));
     }
 
 

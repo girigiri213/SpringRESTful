@@ -8,6 +8,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.Transient;
 import java.util.List;
 
 /**
@@ -21,5 +22,8 @@ public interface RepairHistoryRepository extends PagingAndSortingRepository<Repa
     @RestResource(path = "/findByState", rel = "findByState")
     @Query("FROM RepairHistory L WHERE L.repairState = :state")
     List<RepairHistory> findByRepairState(@Param("state") int repairState);
+
+    @Transactional
+    List<RepairHistory> findByManagerId(long managerId);
 
 }

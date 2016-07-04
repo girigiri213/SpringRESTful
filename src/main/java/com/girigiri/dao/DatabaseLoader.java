@@ -46,6 +46,7 @@ public class DatabaseLoader implements CommandLineRunner {
         RepairHistory repairHistory = new RepairHistory();
         repairHistory.setDelayType(1);
         repairHistory.setRepairState(1);
+        repairHistory.setManagerId((long) 3);
         request.setRepairHistory(repairHistory);
         ComponentRequest componentRequest = new ComponentRequest("name", "serial", 100);
         componentRequest.setState(1);

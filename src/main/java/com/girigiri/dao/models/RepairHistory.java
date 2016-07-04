@@ -53,8 +53,6 @@ public class RepairHistory {
     private int delayType;
 
 
-//    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-//    private List<ComponentRequest> componentRequests = new ArrayList<>();
 
     @Version
     @JsonIgnore

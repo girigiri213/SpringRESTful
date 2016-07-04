@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -204,9 +205,10 @@ public class CustomerController extends BaseController {
         List<Customer> list = customerRepository.search(userId, mobile, contactName);
         long finalUpperBound = upperBound;
         long finalLowerBound = lowerBound;
-        list.stream().filter(customer -> (customer.getCreated() <= finalUpperBound && customer.getCreated() >= finalLowerBound))
-                .forEach(customer -> customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel()));
-        return ResponseEntity.ok(new Resources<>(list));
+        List<Customer> rst = list.stream().filter(customer -> (customer.getCreated() <= finalUpperBound && customer.getCreated() >= finalLowerBound))
+                .collect(toList());
+        rst.forEach(customer -> customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel()));
+        return ResponseEntity.ok(new Resources<>(rst));
     }
 
 
