@@ -186,12 +186,26 @@ public class CustomerController extends BaseController {
     }
 
 
-    @RequestMapping(value = "/search", method = RequestMethod.GET, params = {"userId", "mobile", "contactName"})
-    public @ResponseBody ResponseEntity<?> search(@RequestParam("userId") String userId,
-                                                  @RequestParam("mobile") String mobile,
-                                                  @RequestParam("contactName") String contactName) {
+    @RequestMapping(value = "/searchCustomer", method = RequestMethod.GET, params = {"userId", "mobile", "contactName", "low", "high"})
+    public
+    @ResponseBody
+    ResponseEntity<?> search(@RequestParam("userId") String userId,
+                             @RequestParam("mobile") String mobile,
+                             @RequestParam("contactName") String contactName,
+                             @RequestParam("low") String low,
+                             @RequestParam("high") String high) {
+        if (userId.equals("")) userId = "%";
+        if (mobile.equals("")) mobile = "%";
+        long lowerBound = Long.MIN_VALUE;
+        long upperBound = Long.MAX_VALUE;
+        if (contactName.equals("")) contactName = "%";
+        if (!low.equals("")) lowerBound = Long.parseLong(low);
+        if (!high.equals("")) upperBound = Long.parseLong(high);
         List<Customer> list = customerRepository.search(userId, mobile, contactName);
-        list.forEach(customer -> customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel()));
+        long finalUpperBound = upperBound;
+        long finalLowerBound = lowerBound;
+        list.stream().filter(customer -> (customer.getCreated() <= finalUpperBound && customer.getCreated() >= finalLowerBound))
+                .forEach(customer -> customer.set_links(linkTo(methodOn(CustomerController.class).getCustomer(customer.getId())).withSelfRel()));
         return ResponseEntity.ok(new Resources<>(list));
     }
 
@@ -220,9 +234,6 @@ public class CustomerController extends BaseController {
             throw new RestUtils.CustomerNotFoundException(id);
         }
     }
-
-
-
 
 
 }

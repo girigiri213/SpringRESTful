@@ -46,7 +46,7 @@ public class CheckoutController {
         HSSFWorkbook workbook = PoiUtil.saveCheckoutBill(request, customer, list);
         response.setContentType("application/vnd.ms-excel; charset=utf-8");
         response.setHeader("Content-Disposition",
-                "attachment; filename=" + "结算清单.xls");
+                "attachment; filename=" + "checkout.xls");
         workbook.write(response.getOutputStream()); // Write workbook to response.
         workbook.close();
     }
