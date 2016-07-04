@@ -4,6 +4,7 @@ import com.girigiri.dao.models.Request;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,12 @@ public interface RequestRepository extends PagingAndSortingRepository<Request, L
     List<Request> removeByCusId(long cus_id);
 
 
+    @Transactional
+    @Query("FROM Request L WHERE L.id = :id AND L.cusId = :cusId")
+    List<Request> search(@Param("id") long id, @Param("cusId") long cusId);
+
+
+    List<Request> findByCusId(long cusId);
 
 
 }
