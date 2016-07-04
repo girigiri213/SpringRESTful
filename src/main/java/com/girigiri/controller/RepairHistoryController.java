@@ -220,6 +220,7 @@ public class RepairHistoryController extends BaseController {
     private void compareAndUpdate(RepairHistory before, RepairHistory after) {
         before.setCheckHistory(after.getCheckHistory());
         before.setRepairState(after.getRepairState());
+        before.setRepairTime(after.getRepairTime());
         before.setDelayType(after.getDelayType());
         before.setAssignTime(after.getAssignTime());
         before.setManPrice(after.getManPrice());

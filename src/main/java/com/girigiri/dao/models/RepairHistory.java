@@ -53,7 +53,6 @@ public class RepairHistory {
     private int delayType;
 
 
-
     @Version
     @JsonIgnore
     private Long version;
@@ -83,9 +82,6 @@ public class RepairHistory {
         this.repairState = repairState;
         this.delayType = delayType;
     }
-
-
-
 
 
     public Long getId() {
@@ -206,7 +202,6 @@ public class RepairHistory {
 
     public void setManagerId(Long managerId) {
         this.managerId = managerId;
-        this.repairState = 2;
     }
 
 //    public List<ComponentRequest> getComponentRequests() {

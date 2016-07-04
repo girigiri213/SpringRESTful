@@ -15,7 +15,6 @@ import java.util.List;
  * Created by JianGuo on 6/25/16.
  * DAO service for model {@link RepairHistory}
  */
-@RepositoryRestResource(path = "/repairHistories")
 public interface RepairHistoryRepository extends PagingAndSortingRepository<RepairHistory, Long>{
 
     @Transactional(readOnly = true)
