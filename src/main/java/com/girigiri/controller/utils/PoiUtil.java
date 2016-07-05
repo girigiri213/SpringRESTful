@@ -169,7 +169,7 @@ public class PoiUtil {
         cell = sheet.getRow(2).createCell(4);
         cell.setCellValue("修复日期:");
         cell = sheet.getRow(2).createCell(6);
-        cell.setCellValue(request.getRepairHistory().getRepairTime());
+        cell.setCellValue(request.getRepairHistory().getRepairTime() + "");
 
         sheet.createRow(3);
         cell = sheet.getRow(3).createCell(0);
@@ -180,27 +180,27 @@ public class PoiUtil {
         cell = sheet.getRow(3).createCell(4);
         cell.setCellValue("机器品牌:");
         cell = sheet.getRow(3).createCell(6);
-        cell.setCellValue(request.getDevice().getBrand());
+        cell.setCellValue(request.getDevice().getBrand() + "");
 
         sheet.createRow(4);
         cell = sheet.getRow(4).createCell(0);
         cell.setCellValue("机器型号:");
         cell = sheet.getRow(4).createCell(2);
-        cell.setCellValue(request.getDevice().getNumber());
+        cell.setCellValue(request.getDevice().getNumber() + "");
         cell = sheet.getRow(4).createCell(4);
         cell.setCellValue("系列号:");
         cell = sheet.getRow(4).createCell(6);
-        cell.setCellValue(request.getDevice().getSerial());
+        cell.setCellValue(request.getDevice().getSerial() + "");
 
         sheet.createRow(5);
         cell = sheet.getRow(5).createCell(0);
         cell.setCellValue("单位名称:");
         cell = sheet.getRow(5).createCell(2);
-        cell.setCellValue(customer.getCompanyName());
+        cell.setCellValue(customer.getCompanyName() + "");
         cell = sheet.getRow(5).createCell(4);
         cell.setCellValue("联系人:");
         cell = sheet.getRow(5).createCell(6);
-        cell.setCellValue(customer.getContactName());
+        cell.setCellValue(customer.getContactName() + "");
 
         sheet.createRow(6);
         cell = sheet.getRow(6).createCell(0);
@@ -224,7 +224,7 @@ public class PoiUtil {
         sheet.createRow(8);
         cell = sheet.getRow(8).createCell(0);
         cell.setCellStyle(cellStyle);
-        cell.setCellValue(request.getDevice().getError());
+        cell.setCellValue(request.getDevice().getError() + "");
 
         sheet.createRow(9);
         cell = sheet.getRow(9).createCell(0);
@@ -237,11 +237,11 @@ public class PoiUtil {
 
         sheet.createRow(10);
         cell = sheet.getRow(10).createCell(0);
-        cell.setCellValue(request.getRepairHistory().getPromise());
+        cell.setCellValue(request.getRepairHistory().getPromise() + "");
         cell.setCellStyle(cellStyle);
 
         cell = sheet.getRow(10).createCell(4);
-        cell.setCellValue(request.getRepairHistory().getWarning());
+        cell.setCellValue(request.getRepairHistory().getWarning() + "");
         cell.setCellStyle(cellStyle);
 
         sheet.createRow(11);
@@ -258,7 +258,7 @@ public class PoiUtil {
             cell = sheet.getRow(12 + i).createCell(0);
             cell.setCellValue(componentRequestList.get(i).getName());
             cell = sheet.getRow(12 + i).createCell(2);
-            cell.setCellValue(componentRequestList.get(i).getSerial());
+            cell.setCellValue(componentRequestList.get(i).getSerial() + "");
             cell = sheet.getRow(12 + i).createCell(4);
             cell.setCellValue(componentRequestList.get(i).getSize());
             cell = sheet.getRow(12 + i).createCell(6);

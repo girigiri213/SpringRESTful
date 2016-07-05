@@ -191,6 +191,7 @@ public class ComponentController extends BaseController {
     public
     @ResponseBody
     ResponseEntity<?> search(@RequestParam(value = "name", required = false) String name) {
+        if (name == null || name.equals("")) name = "%";
         List<Component> list = componentRepository.findByName(name);
         list.forEach(component -> component.set_links(linkTo(methodOn(ComponentController.class).getComponent(component.getId())).withSelfRel()));
         return ResponseEntity.ok(new Resources<>(list));
